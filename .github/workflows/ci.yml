@@ -1,0 +1,45 @@
+name: CI
+
+# Fast sanity checks on every push and PR. No build step — this is a static
+# site — so we just make sure nothing is broken or leaking third-party requests.
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax-check every JS module
+        run: |
+          for f in $(git ls-files '*.js'); do
+            echo "checking $f"
+            node --check "$f"
+          done
+
+      - name: Validate JSON (manifest + package.json)
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest ok')"
+          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json ok')"
+
+      - name: Guard against third-party requests (no tracking, no CDN fonts)
+        run: |
+          if git grep -nE 'fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager|gtag\(' -- '*.html' '*.css' '*.js'; then
+            echo "::error::Found a third-party request above — the kit must stay request-free."
+            exit 1
+          fi
+          echo "clean: no third-party requests"
+
+      - name: Check every referenced font file exists
+        run: |
+          missing=0
+          for f in $(grep -ohrE '/assets/fonts/[a-z0-9-]+\.woff2' assets/css | sort -u); do
+            if [ ! -f ".$f" ]; then echo "::error::missing font $f"; missing=1; fi
+          done
+          [ "$missing" = 0 ] && echo "all referenced fonts present"

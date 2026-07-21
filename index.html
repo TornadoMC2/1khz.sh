@@ -50,16 +50,41 @@
       </div>
 
       <div class="ctrl-row">
-        <div class="ctrl">
-          <span class="ctrl-label" id="waveLabel">Waveform</span>
-          <div class="seg" id="waveSeg" role="group" aria-labelledby="waveLabel">
-            <button type="button" data-wave="sine" aria-pressed="true"><span class="led"></span>Sine</button>
-            <button type="button" data-wave="square" aria-pressed="false"><span class="led"></span>Square</button>
-            <button type="button" data-wave="pink" aria-pressed="false"><span class="led"></span>Pink</button>
-            <button type="button" data-wave="white" aria-pressed="false"><span class="led"></span>White</button>
-            <button type="button" data-wave="sweep" aria-pressed="false"><span class="led"></span>Sweep</button>
+        <div class="ctrl grow">
+          <span class="ctrl-label" id="waveLabel">Signal</span>
+          <div class="wave-groups" id="waveSeg" role="group" aria-labelledby="waveLabel">
+            <div class="wave-group">
+              <span class="wave-group-label">Tones</span>
+              <div class="seg">
+                <button type="button" data-wave="sine" aria-pressed="true"><span class="led"></span>Sine</button>
+                <button type="button" data-wave="triangle" aria-pressed="false"><span class="led"></span>Tri</button>
+                <button type="button" data-wave="square" aria-pressed="false"><span class="led"></span>Square</button>
+                <button type="button" data-wave="saw" aria-pressed="false"><span class="led"></span>Saw</button>
+              </div>
+            </div>
+            <div class="wave-group">
+              <span class="wave-group-label">Noise</span>
+              <div class="seg">
+                <button type="button" data-wave="white" aria-pressed="false"><span class="led"></span>White</button>
+                <button type="button" data-wave="pink" aria-pressed="false"><span class="led"></span>Pink</button>
+                <button type="button" data-wave="brown" aria-pressed="false"><span class="led"></span>Brown</button>
+                <button type="button" data-wave="blue" aria-pressed="false"><span class="led"></span>Blue</button>
+              </div>
+            </div>
+            <div class="wave-group">
+              <span class="wave-group-label">Moving</span>
+              <div class="seg">
+                <button type="button" data-wave="sweep-up" aria-pressed="false"><span class="led"></span>Sweep &uarr;</button>
+                <button type="button" data-wave="sweep-down" aria-pressed="false"><span class="led"></span>Sweep &darr;</button>
+                <button type="button" data-wave="warble" aria-pressed="false"><span class="led"></span>Warble</button>
+                <button type="button" data-wave="pulse" aria-pressed="false"><span class="led"></span>Pulse</button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div class="ctrl-row">
         <div class="ctrl">
           <span class="ctrl-label" id="chanLabel">Channel</span>
           <div class="seg" id="chanSeg" role="group" aria-labelledby="chanLabel">

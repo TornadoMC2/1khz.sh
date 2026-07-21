@@ -33,7 +33,7 @@ easy: `http://localhost:8000/?f=440`.
 
 | Path | Module | Does |
 | --- | --- | --- |
-| `/` | **1K-GEN** | Signal generator: sine, square, pink, white, 20 Hz–20 kHz sweep. Log frequency dial with presets and typed entry, L / L+R / R routing, dBFS level fader (defaults to −18), live oscilloscope, note + wavelength + period readouts. Space bar toggles output; output always starts off. |
+| `/` | **1K-GEN** | Signal generator with the signals grouped into **Tones** (sine, triangle, square, saw), **Noise** (white, pink, brown, blue), and **Moving** (sweep ↑, sweep ↓, warble, pulse). Log frequency dial with presets and typed entry, L / L+R / R routing, dBFS level fader (defaults to −18), live oscilloscope, note + wavelength + period readouts. Space bar toggles output; output always starts off. |
 | `/delay/` | **1K-DLY** | Distance ↔ milliseconds with temperature-corrected speed of sound, plus samples at 44.1/48/96/192 kHz. |
 | `/db/` | **1K-LVL** | dBu ↔ dBV ↔ dBFS ↔ volts, with a converter-alignment setting (0 dBFS = +24/+18/… dBu) and headroom readouts. |
 | `/rt60/` | **1K-RT60** | Sabine RT60 estimate from room dimensions and average absorption, Schroeder frequency, and the room-mode table (axial / tangential / oblique) below 300 Hz. |
@@ -44,10 +44,12 @@ easy: `http://localhost:8000/?f=440`.
 
 - Plain HTML + one shared stylesheet (`assets/css/panel.css`) + vanilla ES
   modules. No framework, no build step, no dependencies.
-- Web Audio API for all signal generation. Pink noise is a Paul Kellet
-  filter rendered into a looping buffer; the sweep is a chained exponential
-  ramp; the scope is an `AnalyserNode` into a canvas with a rising-edge
-  trigger so periodic waves hold still.
+- Web Audio API for all signal generation. Tones are native `OscillatorNode`
+  types; noise is generated into looping buffers (pink is a Paul Kellet filter,
+  brown a leaky integral of white, blue the first difference of pink, all RMS-
+  matched); sweeps are chained exponential ramps; warble is an LFO on the tone's
+  frequency; pulse is a square-LFO gate. The scope is an `AnalyserNode` into a
+  canvas with a rising-edge trigger so periodic waves hold still.
 - Audio only ever starts from a user gesture, and the output gain ramps over
   ~10 ms so the power switch never clicks.
 - Two self-hosted webfonts (Barlow Semi Condensed for panel labels, IBM Plex
@@ -114,6 +116,24 @@ the same files for `*.1khz.sh`, which narrows the options:
 
 No cache headers are required, but everything here is immutable-friendly if
 you want to set long TTLs on `/assets/`.
+
+### Continuous deployment (GitHub Actions)
+
+Two workflows ship in `.github/workflows/`:
+
+- **`ci.yml`** — runs on every push and PR: syntax-checks every JS module,
+  validates the manifest / `package.json`, and fails if a third-party request
+  (Google Fonts, analytics) ever sneaks back in. No secrets needed.
+- **`deploy.yml`** — publishes to **Cloudflare Pages** on push to `master`
+  (Cloudflare because it's the option that keeps `*.1khz.sh` working). Add two
+  repository secrets to turn it on:
+  - `CLOUDFLARE_API_TOKEN` — a token with *Cloudflare Pages: Edit*
+  - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard sidebar
+
+  and set `PROJECT` in the workflow to your Pages project name. Until the
+  secrets exist the workflow runs but skips the publish step, so it never fails
+  a fork. Prefer another host? Delete `deploy.yml` and deploy however you like —
+  `ci.yml` stays useful regardless.
 
 ## Project links (source + donations)
 
