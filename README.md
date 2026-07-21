@@ -2,8 +2,13 @@
 
 A browser-based signal generator and a small suite of calculators for live
 sound and studio work. Fully static, fully client-side: no backend, no
-accounts, no tracking, nothing to install. Built to load fast on venue Wi-Fi
-and work on a phone at load-in.
+accounts, no ads, no tracking, nothing to install. Built to load fast on venue
+Wi-Fi and work on a phone at load-in — and it installs as an offline PWA, so
+once it's loaded it runs with no signal at all.
+
+Free and open source under the [MIT license](LICENSE). No third-party requests
+of any kind: even the fonts are self-hosted, so nothing about a visitor ever
+leaves their browser.
 
 ## The trick
 
@@ -45,17 +50,39 @@ easy: `http://localhost:8000/?f=440`.
   trigger so periodic waves hold still.
 - Audio only ever starts from a user gesture, and the output gain ramps over
   ~10 ms so the power switch never clicks.
-- Two webfonts (Barlow Semi Condensed for panel labels, IBM Plex Mono for
-  readouts), loaded with `display=swap`. Everything else is CSS.
+- Two self-hosted webfonts (Barlow Semi Condensed for panel labels, IBM Plex
+  Mono for readouts). Only the latin subset of each weight is vendored as
+  `woff2` in `assets/fonts/` (~110 KB total), served same-origin with
+  `font-display: swap` and preloaded. **No Google Fonts, no `gstatic`
+  request** — regenerate the files with `npm run fonts` if you change weights.
+- Everything else is CSS. No JavaScript is loaded from anywhere but this
+  origin, and there are no analytics, cookies, or storage.
+
+## Progressive Web App / offline
+
+The site is installable and works offline:
+
+- `manifest.webmanifest` makes it installable (standalone display, maskable
+  icon, app shortcuts to A440 and each module).
+- `sw.js` is a service worker that precaches the whole kit — every page, the
+  stylesheet, every module, the fonts — and serves it stale-while-revalidate:
+  instant on repeat visits, still self-updating on the next load, and fully
+  functional with no network (airplane mode, a basement, dead venue Wi-Fi).
+- It registers only over HTTPS, so `http://localhost` dev is unaffected.
+- Bump the `CACHE` constant at the top of `sw.js` when you ship changes so old
+  caches are cleared on activate.
 
 ## Local development
 
 ES modules need a real origin, so serve the folder instead of opening files:
 
 ```sh
-python3 -m http.server 8000
+npm start          # python3 -m http.server 8000
 # then http://localhost:8000/?f=440
 ```
+
+The service worker stays dormant on `http://localhost` (it needs HTTPS), so
+you always see fresh files while developing.
 
 ## Deploying
 
@@ -88,13 +115,36 @@ the same files for `*.1khz.sh`, which narrows the options:
 No cache headers are required, but everything here is immutable-friendly if
 you want to set long TTLs on `/assets/`.
 
+## Project links (source + donations)
+
+Both live in one file, [`assets/js/config.js`](assets/js/config.js):
+
+```js
+export const SITE = {
+  sourceUrl: "https://github.com/YOUR-USER/1khz.sh", // your repo
+  donateUrl: "https://ko-fi.com/YOUR-HANDLE",        // any URL, or "" to hide
+  donateLabel: "Support on Ko-fi",
+};
+```
+
+Edit those two URLs once and the footer of every page updates. Set a value to
+`""` to drop that link entirely. The links ship as placeholders — swap in your
+real GitHub repo and Ko-fi (or Buy Me a Coffee / GitHub Sponsors) before going
+live.
+
 ## Monetization posture
 
-None, basically. No ads, no analytics. There's a placeholder donation link in
-the footer (search for `DONATION LINK` and swap in a real Ko-fi/BMC URL), and
-two clearly marked dormant affiliate slots (`AFFILIATE SLOT` comments on
-`/rt60/` and `/spl/`) styled and positioned but shipped `display:none` — fill
-them in, remove the class, and disclose, or leave them off forever.
+None, basically. No ads, no analytics, no tracking. The only ask is the
+optional donation link above. Two clearly marked dormant affiliate slots
+(`AFFILIATE SLOT` comments on `/rt60/` and `/spl/`) ship styled but
+`display:none` — fill them in, remove the class, and disclose, or leave them
+off forever.
+
+## License
+
+[MIT](LICENSE) — use it, fork it, ship it. The bundled fonts are OFL-licensed
+(Barlow Semi Condensed, IBM Plex Mono); see the notice at the bottom of the
+LICENSE file.
 
 ## Accuracy notes
 

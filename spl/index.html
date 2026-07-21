@@ -2,14 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SPL &amp; Power — 1kHz.sh</title>
   <meta name="description" content="Loudspeaker SPL at distance, amplifier power for a target level with headroom, and speaker cable voltage-drop calculator.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/panel.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0a0b0d">
+  <link rel="apple-touch-icon" href="/assets/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="1kHz.sh">
 </head>
 <body data-page="spl">
 
@@ -206,12 +212,22 @@
   <footer class="rack-foot">
     <hr class="foot-rule">
     <p>
-      No ads, no tracking, no backend — the whole kit runs in your browser.
-      If it saved a soundcheck, you can
-      <!-- DONATION LINK: replace with your real Ko-fi / Buy Me a Coffee URL -->
-      <a href="https://ko-fi.com/YOUR-HANDLE" rel="noopener">chip in for the domains</a>.
+      No ads, no tracking, no backend — the whole kit runs in your browser,
+      and keeps working offline once loaded. Free and open source; if it saved
+      a soundcheck, the source and a tip jar are below.
     </p>
-    <p>Tip: any number works as a subdomain — <a href="https://60.1khz.sh">60.1khz.sh</a> is mains hum.</p>
+    <nav class="foot-links" aria-label="Project">
+      <!-- Links are set from /assets/js/config.js — edit them there, once. -->
+      <a data-site="source" rel="noopener noreferrer" target="_blank" aria-label="Source code on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-label>Source on GitHub</span>
+      </a>
+      <a data-site="donate" class="foot-donate" rel="noopener noreferrer" target="_blank" aria-label="Support the project">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 14.25l-1.02-.93C3.4 10.07 1 7.9 1 5.25 1 3.42 2.42 2 4.25 2 5.28 2 6.27 2.48 8 4c1.73-1.52 2.72-2 3.75-2C13.58 2 15 3.42 15 5.25c0 2.65-2.4 4.82-5.98 8.07L8 14.25z"/></svg>
+        <span data-label>Support on Ko-fi</span>
+      </a>
+      <a href="https://60.1khz.sh">Try 60.1khz.sh — mains hum</a>
+    </nav>
   </footer>
 
   <script type="module" src="/assets/js/panel-common.js"></script>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="1kHz.sh">
+  <!-- Full-bleed background; waveform kept inside the ~80% maskable safe zone. -->
+  <rect width="512" height="512" fill="#14100a"/>
+  <path d="M112 256 C160 160 181 160 224 256 S288 352 331 256 395 160 422 208"
+        fill="none" stroke="#ffb257" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

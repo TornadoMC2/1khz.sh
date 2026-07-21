@@ -8,6 +8,43 @@
      IBM Plex Mono         — readouts, values, and running text
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   Self-hosted fonts (latin subset, woff2). No third-party requests: nothing
+   about a visitor ever reaches Google. Files live in /assets/fonts/ and are
+   precached by the service worker, so after the first visit type is instant
+   and available offline. Regenerate with the `npm run fonts` note in README.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal; font-weight: 500; font-display: swap;
+  src: url("/assets/fonts/barlow-sc-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url("/assets/fonts/barlow-sc-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url("/assets/fonts/barlow-sc-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal; font-weight: 500; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url("/assets/fonts/ibm-plex-mono-600.woff2") format("woff2");
+}
+
 :root {
   /* palette */
   --void:      #0a0b0d;   /* the room behind the rack */
@@ -639,11 +676,68 @@ table.data tr.axial td:last-child { color: var(--amber-hot); }
   margin: 0 0 14px;
 }
 
+.rack-foot .foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 12px;
+}
+.rack-foot .foot-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: var(--silk-dim);
+  border-bottom: 1px solid transparent;
+}
+.rack-foot .foot-links a:hover { color: var(--amber); }
+.rack-foot .foot-links a svg { width: 15px; height: 15px; flex: none; }
+.rack-foot .foot-donate {
+  color: var(--amber) !important;
+  border: 1px solid var(--amber-dim);
+  border-radius: 4px;
+  padding: 5px 11px;
+  background: var(--recess);
+}
+.rack-foot .foot-donate:hover {
+  color: var(--amber-hot) !important;
+  border-color: var(--amber);
+  box-shadow: 0 0 16px rgba(255,178,87,0.12);
+}
+
 /* affiliate slots ship dormant — see the HTML comments where they live */
 .affiliate-slot { display: none; }
+
+/* --------------------------------------------------------------------------
+   Touch: kill the double-tap zoom delay and keep tap targets comfortable on
+   phones without inflating the dense bench look on desktop.
+   -------------------------------------------------------------------------- */
+button, .seg button, .presets button, .power, .rack-nav a,
+input[type="range"].fader, .field input, .field select {
+  touch-action: manipulation;
+}
 
 @media (max-width: 640px) {
   .rack-head { gap: 10px; }
   .tuned-chip { order: 2; margin-left: auto; }
   .rack-nav { order: 3; flex-basis: 100%; margin-left: 0; }
+
+  /* roomier hit areas for gloved/hurried hands at load-in */
+  .rack-nav a { padding: 9px 12px; }
+  .seg button { padding: 11px 14px; }
+  .presets button { padding: 8px 12px; font-size: 13px; }
+  .field input, .field select { font-size: 16px; } /* 16px stops iOS zoom-on-focus */
+}
+
+/* --------------------------------------------------------------------------
+   Safe areas: keep content clear of notches / rounded corners when the PWA
+   runs fullscreen with viewport-fit=cover, in portrait and landscape.
+   -------------------------------------------------------------------------- */
+@supports (padding: max(0px)) {
+  .rack-head, .rack, .rack-foot {
+    padding-left: max(clamp(10px, 2.5vw, 24px), env(safe-area-inset-left));
+    padding-right: max(clamp(10px, 2.5vw, 24px), env(safe-area-inset-right));
+  }
+  .rack-foot { padding-bottom: max(48px, calc(env(safe-area-inset-bottom) + 24px)); }
 }

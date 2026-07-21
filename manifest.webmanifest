@@ -1,0 +1,25 @@
+{
+  "name": "1kHz.sh — Audio Field Kit",
+  "short_name": "1kHz.sh",
+  "description": "Browser signal generator and a field kit of audio calculators — delay, level, RT60, note/frequency, SPL. No accounts, no ads, no tracking. Works offline.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0b0d",
+  "theme_color": "#0a0b0d",
+  "categories": ["utilities", "music", "productivity"],
+  "icons": [
+    { "src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/assets/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "A440 tone", "short_name": "A440", "url": "/?f=440" },
+    { "name": "Delay Time", "short_name": "Delay", "url": "/delay/" },
+    { "name": "Level Converter", "short_name": "Level", "url": "/db/" },
+    { "name": "RT60", "short_name": "RT60", "url": "/rt60/" },
+    { "name": "Note / Frequency", "short_name": "Note", "url": "/note/" },
+    { "name": "SPL & Power", "short_name": "SPL", "url": "/spl/" }
+  ]
+}
