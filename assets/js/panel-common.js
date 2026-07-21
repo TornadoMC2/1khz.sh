@@ -3,8 +3,11 @@
  *  - bounces sibling domains (2khz.sh) home with their frequency
  *  - marks the current module in the rack nav
  *  - lights the header chip if the visitor arrived tuned to a frequency
+ *  - fills the footer's source / donation links from config.js
+ *  - registers the service worker so the kit loads instantly and works offline
  */
 import { redirectSiblingDomains, getTunedFrequency, formatHz } from "./host-freq.js";
+import { SITE } from "./config.js";
 
 if (!redirectSiblingDomains()) {
   // Nav: body[data-page] names the current module.
@@ -22,5 +25,27 @@ if (!redirectSiblingDomains()) {
     chip.hidden = false;
     chip.href = `/?f=${hz}`;
     chip.innerHTML = `<span class="chip-label">Tuned</span><span>${formatHz(hz)}</span>`;
+  }
+
+  // Footer links come from config.js — one place to edit, every page updates.
+  // An anchor with an empty URL is removed, so unconfigured links never show.
+  const linkFor = (sel, url, label) => {
+    const a = document.querySelector(sel);
+    if (!a) return;
+    if (!url) { a.remove(); return; }
+    a.href = url;
+    if (label) {
+      const span = a.querySelector("[data-label]");
+      if (span) span.textContent = label;
+    }
+  };
+  linkFor('[data-site="source"]', SITE.sourceUrl);
+  linkFor('[data-site="donate"]', SITE.donateUrl, SITE.donateLabel);
+
+  // Service worker: progressive enhancement, only where supported and secure.
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => { /* offline support is optional */ });
+    });
   }
 }
