@@ -1,0 +1,649 @@
+/* ==========================================================================
+   1kHz.sh — panel.css
+   One design system for the whole rack. Every page is a unit in the same
+   case: dark machined panels, silkscreened labels, amber readouts.
+
+   Type roles:
+     Barlow Semi Condensed — silkscreen: nameplates, labels, buttons
+     IBM Plex Mono         — readouts, values, and running text
+   ========================================================================== */
+
+:root {
+  /* palette */
+  --void:      #0a0b0d;   /* the room behind the rack */
+  --rail:      #131519;   /* rack rails / page gutter */
+  --panel-hi:  #24282e;   /* brushed panel, lit edge */
+  --panel-lo:  #191c20;   /* brushed panel, shadow edge */
+  --edge:      #343a42;   /* machined bevel */
+  --recess:    #0e1013;   /* inset wells behind controls */
+  --silk:      #c9cdd3;   /* silkscreen ink */
+  --silk-dim:  #7d838d;   /* secondary silkscreen */
+  --etch:      #3d434c;   /* engraved rules */
+  --amber:     #ffb257;   /* readout phosphor */
+  --amber-hot: #ffd9a0;   /* readout highlight */
+  --amber-dim: rgba(255, 178, 87, 0.28);
+  --lcd:       #14100a;   /* readout window glass */
+  --live:      #ff5747;   /* OUTPUT-live LED */
+
+  /* type */
+  --f-silk: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --f-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* metrics */
+  --rack-w: 920px;
+  --r: 6px;             /* corner radius: machined, not friendly */
+  --pad: clamp(16px, 3vw, 30px);
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #15181d 0%, var(--void) 60%),
+    var(--void);
+  color: var(--silk);
+  font-family: var(--f-mono);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Focus + motion floor
+   -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The rack: header rails, units, footer
+   -------------------------------------------------------------------------- */
+.rack {
+  max-width: var(--rack-w);
+  margin: 0 auto;
+  padding: 0 clamp(10px, 2.5vw, 24px) 40px;
+}
+
+.rack-head {
+  max-width: var(--rack-w);
+  margin: 0 auto;
+  padding: 18px clamp(10px, 2.5vw, 24px) 14px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  line-height: 1.05;
+}
+.brand-mark {
+  font-family: var(--f-silk);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--silk);
+}
+.brand-mark b { color: var(--amber); font-weight: 700; }
+.brand-sub {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+  margin-top: 3px;
+}
+
+.rack-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+}
+.rack-nav a {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--silk-dim);
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.rack-nav a:hover { color: var(--silk); border-color: var(--etch); }
+.rack-nav a[aria-current="page"] {
+  color: var(--amber);
+  border-color: var(--etch);
+  background: var(--recess);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+}
+
+/* the signature: whatever frequency the hostname carried rides in the header */
+.tuned-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  text-decoration: none;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--amber);
+  background: var(--lcd);
+  border: 1px solid var(--etch);
+  border-radius: 4px;
+  padding: 5px 10px;
+  box-shadow: inset 0 1px 6px rgba(0,0,0,0.7);
+  text-shadow: 0 0 8px var(--amber-dim);
+}
+.tuned-chip .chip-label {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--silk-dim);
+  text-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Units (panels)
+   -------------------------------------------------------------------------- */
+.unit {
+  position: relative;
+  background: linear-gradient(178deg, var(--panel-hi) 0%, var(--panel-lo) 100%);
+  border: 1px solid var(--edge);
+  border-radius: var(--r);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -2px 6px rgba(0,0,0,0.35),
+    0 14px 30px rgba(0,0,0,0.45);
+  padding: var(--pad);
+  margin-bottom: 22px;
+}
+
+/* corner screws */
+.unit::before, .unit::after,
+.unit > .screws::before, .unit > .screws::after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background:
+    linear-gradient(135deg, transparent 44%, #565d66 45%, #565d66 55%, transparent 56%),
+    radial-gradient(circle at 35% 30%, #4d545d 0%, #23262b 70%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.05);
+}
+.unit::before          { top: 9px;    left: 9px;  }
+.unit::after           { top: 9px;    right: 9px; }
+.unit > .screws::before { bottom: 9px; left: 9px;  }
+.unit > .screws::after  { bottom: 9px; right: 9px; }
+
+.plate-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--etch);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+.plate-name {
+  margin: 0;
+  font-family: var(--f-silk);
+  font-weight: 700;
+  font-size: clamp(19px, 3vw, 24px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--silk);
+}
+.plate-model {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Control primitives
+   -------------------------------------------------------------------------- */
+.ctrl-label,
+label.ctrl-label {
+  display: block;
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+  margin-bottom: 7px;
+}
+
+.ctrl-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+.ctrl-row:last-child { margin-bottom: 0; }
+.ctrl { min-width: 0; }
+.ctrl.grow { flex: 1 1 220px; }
+
+/* Segmented hardware buttons */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  background: var(--recess);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.seg button {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--etch);
+  background: transparent;
+  color: var(--silk-dim);
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: color 120ms, background 120ms;
+}
+.seg button:last-child { border-right: 0; }
+.seg button:hover { color: var(--silk); }
+.seg button[aria-pressed="true"] {
+  color: var(--amber-hot);
+  background: linear-gradient(180deg, rgba(255,178,87,0.14), rgba(255,178,87,0.05));
+  text-shadow: 0 0 8px var(--amber-dim);
+}
+.seg button .led {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #35322c;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.7);
+  transition: background 120ms, box-shadow 120ms;
+}
+.seg button[aria-pressed="true"] .led {
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber), 0 0 14px var(--amber-dim);
+}
+
+/* Readout windows */
+.led-window {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  background: var(--lcd);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+  padding: 8px 12px;
+  font-family: var(--f-mono);
+}
+.led-window .val {
+  color: var(--amber);
+  font-size: 20px;
+  font-weight: 600;
+  text-shadow: 0 0 10px var(--amber-dim);
+  font-variant-numeric: tabular-nums;
+}
+.led-window .unit-tag {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+}
+.led-window.big .val { font-size: clamp(26px, 5vw, 34px); }
+.led-window.dim .val { color: var(--silk-dim); text-shadow: none; }
+
+/* LED-styled inputs (numbers you can type into) */
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--lcd);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+  padding: 4px 10px 4px 4px;
+}
+.field input,
+.field select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--amber);
+  font-family: var(--f-mono);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px var(--amber-dim);
+  padding: 5px 8px;
+  width: 8.5ch;
+  min-width: 0;
+}
+.field select { width: auto; cursor: pointer; }
+.field select option { background: var(--panel-lo); color: var(--silk); text-shadow: none; }
+.field input:focus, .field select:focus { outline: none; }
+.field:focus-within { border-color: var(--amber); }
+.field .unit-tag {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+  white-space: nowrap;
+}
+.field.wide input { width: 12ch; }
+
+/* remove number spinners; these are bench fields, not steppers */
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Faders (range inputs) */
+input[type="range"].fader {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 30px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].fader::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--recess);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.8);
+  border: 1px solid var(--etch);
+}
+input[type="range"].fader::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--recess);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.8);
+  border: 1px solid var(--etch);
+}
+input[type="range"].fader::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 26px;
+  margin-top: -11px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #4a515b 0%, #262b31 45%, #383f48 50%, #20242a 100%);
+  border: 1px solid #101215;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+input[type="range"].fader::-moz-range-thumb {
+  width: 14px; height: 26px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #4a515b 0%, #262b31 45%, #383f48 50%, #20242a 100%);
+  border: 1px solid #101215;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+input[type="range"].fader:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--silk-dim);
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+  font-family: var(--f-mono);
+}
+
+/* Preset pills */
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets button {
+  appearance: none;
+  border: 1px solid var(--etch);
+  border-radius: 4px;
+  background: var(--recess);
+  color: var(--silk-dim);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  padding: 5px 9px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
+}
+.presets button:hover { color: var(--amber); border-color: var(--amber-dim); }
+
+/* Power switch */
+.power {
+  appearance: none;
+  border: 1px solid var(--etch);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2b3037 0%, #1b1e23 100%);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  color: var(--silk);
+  font-family: var(--f-silk);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 14px 26px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: box-shadow 160ms, transform 60ms;
+}
+.power:active { transform: translateY(1px); }
+.power .led {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #3a322c;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  transition: background 140ms, box-shadow 140ms;
+}
+.power[aria-pressed="true"] {
+  color: var(--amber-hot);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08),
+              0 0 0 1px rgba(255,178,87,0.25), 0 0 24px rgba(255,87,71,0.12);
+}
+.power[aria-pressed="true"] .led {
+  background: var(--live);
+  box-shadow: 0 0 8px var(--live), 0 0 20px rgba(255,87,71,0.5);
+}
+.kbd-hint { font-size: 11px; color: var(--silk-dim); margin-top: 8px; }
+.kbd-hint kbd {
+  font-family: var(--f-mono);
+  border: 1px solid var(--etch);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 1px 6px;
+  background: var(--recess);
+}
+
+/* --------------------------------------------------------------------------
+   Oscilloscope
+   -------------------------------------------------------------------------- */
+.scope-well {
+  background: var(--lcd);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  box-shadow: inset 0 3px 16px rgba(0,0,0,0.85);
+  padding: 6px;
+  margin-bottom: 20px;
+}
+.scope-well canvas {
+  display: block;
+  width: 100%;
+  height: 190px;
+  border-radius: 3px;
+}
+@media (max-width: 640px) { .scope-well canvas { height: 140px; } }
+
+/* --------------------------------------------------------------------------
+   Results, tables, prose
+   -------------------------------------------------------------------------- */
+.readout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.readout-grid .cell {
+  background: var(--recess);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 6px rgba(0,0,0,0.5);
+}
+.readout-grid .cell .ctrl-label { margin-bottom: 4px; }
+.readout-grid .cell .val {
+  font-family: var(--f-mono);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--amber);
+  text-shadow: 0 0 10px var(--amber-dim);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.readout-grid .cell .sub { font-size: 11px; color: var(--silk-dim); margin-top: 2px; }
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+table.data th {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--etch);
+}
+table.data td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(61,67,76,0.35);
+  color: var(--silk);
+}
+table.data td.hz { color: var(--amber); text-shadow: 0 0 8px var(--amber-dim); }
+table.data tr.axial td:last-child { color: var(--amber-hot); }
+
+.prose p { max-width: 68ch; color: var(--silk); }
+.prose a { color: var(--amber); text-decoration-color: var(--amber-dim); }
+.prose a:hover { color: var(--amber-hot); }
+.prose code {
+  background: var(--recess);
+  border: 1px solid var(--etch);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.92em;
+}
+.footnote { font-size: 12px; color: var(--silk-dim); max-width: 68ch; }
+
+/* --------------------------------------------------------------------------
+   Module rack (homepage elevation)
+   -------------------------------------------------------------------------- */
+.mod-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.mod-list a {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 4px 16px;
+  align-items: baseline;
+  text-decoration: none;
+  background: linear-gradient(180deg, #202429 0%, #181b1f 100%);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  padding: 13px 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.35);
+  transition: border-color 130ms, transform 130ms;
+}
+.mod-list a:hover { border-color: var(--amber-dim); transform: translateX(3px); }
+.mod-id {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--amber);
+  text-shadow: 0 0 8px var(--amber-dim);
+  letter-spacing: 0.04em;
+}
+.mod-name {
+  font-family: var(--f-silk);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--silk);
+}
+.mod-desc {
+  grid-column: 2;
+  font-size: 12.5px;
+  color: var(--silk-dim);
+}
+@media (max-width: 520px) {
+  .mod-list a { grid-template-columns: 1fr; }
+  .mod-desc { grid-column: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+.rack-foot {
+  max-width: var(--rack-w);
+  margin: 0 auto;
+  padding: 6px clamp(10px, 2.5vw, 24px) 48px;
+  font-size: 12.5px;
+  color: var(--silk-dim);
+}
+.rack-foot a { color: var(--amber); text-decoration-color: var(--amber-dim); }
+.rack-foot .foot-rule {
+  border: 0;
+  border-top: 1px solid var(--etch);
+  margin: 0 0 14px;
+}
+
+/* affiliate slots ship dormant — see the HTML comments where they live */
+.affiliate-slot { display: none; }
+
+@media (max-width: 640px) {
+  .rack-head { gap: 10px; }
+  .tuned-chip { order: 2; margin-left: auto; }
+  .rack-nav { order: 3; flex-basis: 100%; margin-left: 0; }
+}

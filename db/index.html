@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Level Converter — 1kHz.sh</title>
+  <meta name="description" content="dBu ↔ dBV ↔ dBFS ↔ volts converter with headroom math against your converter's alignment level.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/panel.css">
+</head>
+<body data-page="db">
+
+  <header class="rack-head">
+    <a class="brand" href="/">
+      <span class="brand-mark">1k<b>Hz</b>.sh</span>
+      <span class="brand-sub">Audio Field Kit</span>
+    </a>
+    <nav class="rack-nav" aria-label="Modules">
+      <a href="/" data-nav="gen">Gen</a>
+      <a href="/delay/" data-nav="delay">Delay</a>
+      <a href="/db/" data-nav="db">Level</a>
+      <a href="/rt60/" data-nav="rt60">RT60</a>
+      <a href="/note/" data-nav="note">Note</a>
+      <a href="/spl/" data-nav="spl">SPL</a>
+    </nav>
+    <a class="tuned-chip" id="tunedChip" href="/" hidden></a>
+  </header>
+
+  <main class="rack">
+    <section class="unit" aria-labelledby="lvlTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h1 class="plate-name" id="lvlTitle">Level Converter</h1>
+        <span class="plate-model">1K-LVL &middot; 0 dBu = 0.775 V</span>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl">
+          <label class="ctrl-label" for="dbuInput">dBu</label>
+          <div class="field"><input id="dbuInput" type="number" step="0.1" value="4" autocomplete="off"><span class="unit-tag">dBu</span></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="dbvInput">dBV</label>
+          <div class="field"><input id="dbvInput" type="number" step="0.1" autocomplete="off"><span class="unit-tag">dBV</span></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="voltInput">Voltage</label>
+          <div class="field"><input id="voltInput" type="number" step="0.001" min="0" autocomplete="off"><span class="unit-tag">V rms</span></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="dbfsInput">dBFS</label>
+          <div class="field"><input id="dbfsInput" type="number" step="0.1" autocomplete="off"><span class="unit-tag">dBFS</span></div>
+        </div>
+      </div>
+
+      <p class="footnote">Edit any field — the other three follow. dBu and dBV are absolute; dBFS depends on where your converters put full scale, which is the alignment setting below.</p>
+
+      <div class="ctrl-row" style="margin-top:20px">
+        <div class="ctrl">
+          <label class="ctrl-label" for="alignSelect">Alignment &mdash; 0 dBFS equals</label>
+          <div class="field">
+            <select id="alignSelect">
+              <option value="24" selected>+24 dBu (US pro / AES)</option>
+              <option value="22">+22 dBu</option>
+              <option value="20">+20 dBu</option>
+              <option value="18">+18 dBu (EBU R68)</option>
+              <option value="15">+15 dBu</option>
+              <option value="custom">Custom&hellip;</option>
+            </select>
+          </div>
+        </div>
+        <div class="ctrl" id="customAlignWrap" hidden>
+          <label class="ctrl-label" for="customAlign">Custom Alignment</label>
+          <div class="field"><input id="customAlign" type="number" step="0.1" value="24" autocomplete="off"><span class="unit-tag">dBu</span></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="nominalInput">Nominal Level</label>
+          <div class="field"><input id="nominalInput" type="number" step="0.1" value="4" autocomplete="off"><span class="unit-tag">dBu</span></div>
+        </div>
+      </div>
+
+      <div class="readout-grid" style="margin-top:20px">
+        <div class="cell">
+          <span class="ctrl-label">Headroom Above Nominal</span>
+          <div class="val" id="headroomVal">20 dB</div>
+          <div class="sub">nominal up to 0 dBFS</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Nominal in dBFS</span>
+          <div class="val" id="nominalFsVal">-20 dBFS</div>
+          <div class="sub">where your tone should sit</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Margin From Entered Level</span>
+          <div class="val" id="marginVal">20 dB</div>
+          <div class="sub">before the entered level clips</div>
+        </div>
+      </div>
+
+      <p class="footnote" style="margin-top:16px">Consumer gear nominal is -10 dBV (&asymp; -7.8 dBu). The 11.8 dB gap to +4 dBu pro level is why that DJ mixer never seems loud enough.</p>
+    </section>
+  </main>
+
+  <footer class="rack-foot">
+    <hr class="foot-rule">
+    <p>
+      No ads, no tracking, no backend — the whole kit runs in your browser.
+      If it saved a soundcheck, you can
+      <!-- DONATION LINK: replace with your real Ko-fi / Buy Me a Coffee URL -->
+      <a href="https://ko-fi.com/YOUR-HANDLE" rel="noopener">chip in for the domains</a>.
+    </p>
+    <p>Tip: any number works as a subdomain — <a href="https://60.1khz.sh">60.1khz.sh</a> is mains hum.</p>
+  </footer>
+
+  <script type="module" src="/assets/js/panel-common.js"></script>
+  <script type="module" src="/assets/js/db.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1kHz.sh — Signal Generator</title>
+  <meta name="description" content="Browser signal generator and audio field kit. Any subdomain is a frequency: 440.1khz.sh opens tuned to A440.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/panel.css">
+</head>
+<body data-page="gen">
+
+  <header class="rack-head">
+    <a class="brand" href="/">
+      <span class="brand-mark">1k<b>Hz</b>.sh</span>
+      <span class="brand-sub">Audio Field Kit</span>
+    </a>
+    <nav class="rack-nav" aria-label="Modules">
+      <a href="/" data-nav="gen">Gen</a>
+      <a href="/delay/" data-nav="delay">Delay</a>
+      <a href="/db/" data-nav="db">Level</a>
+      <a href="/rt60/" data-nav="rt60">RT60</a>
+      <a href="/note/" data-nav="note">Note</a>
+      <a href="/spl/" data-nav="spl">SPL</a>
+    </nav>
+    <a class="tuned-chip" id="tunedChip" href="/" hidden></a>
+  </header>
+
+  <main class="rack">
+
+    <!-- ============================== 1K-GEN ============================== -->
+    <section class="unit" aria-labelledby="genTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h1 class="plate-name" id="genTitle">Signal Generator</h1>
+        <span class="plate-model">1K-GEN &middot; 20 Hz – 20 kHz</span>
+      </div>
+
+      <div class="scope-well">
+        <canvas id="scopeCanvas" aria-label="Oscilloscope view of the output signal" role="img"></canvas>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl">
+          <span class="ctrl-label" id="waveLabel">Waveform</span>
+          <div class="seg" id="waveSeg" role="group" aria-labelledby="waveLabel">
+            <button type="button" data-wave="sine" aria-pressed="true"><span class="led"></span>Sine</button>
+            <button type="button" data-wave="square" aria-pressed="false"><span class="led"></span>Square</button>
+            <button type="button" data-wave="pink" aria-pressed="false"><span class="led"></span>Pink</button>
+            <button type="button" data-wave="white" aria-pressed="false"><span class="led"></span>White</button>
+            <button type="button" data-wave="sweep" aria-pressed="false"><span class="led"></span>Sweep</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <span class="ctrl-label" id="chanLabel">Channel</span>
+          <div class="seg" id="chanSeg" role="group" aria-labelledby="chanLabel">
+            <button type="button" data-chan="left" aria-pressed="false"><span class="led"></span>L</button>
+            <button type="button" data-chan="both" aria-pressed="true"><span class="led"></span>L+R</button>
+            <button type="button" data-chan="right" aria-pressed="false"><span class="led"></span>R</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl">
+          <label class="ctrl-label" for="freqInput">Frequency</label>
+          <div class="field">
+            <input id="freqInput" type="text" inputmode="decimal" value="1000"
+                   aria-describedby="freqHelp" autocomplete="off">
+            <span class="unit-tag">Hz</span>
+          </div>
+          <p class="footnote" id="freqHelp" style="margin:6px 0 0">Type a value — <code>440</code>, <code>1.5k</code> — and press Enter.</p>
+        </div>
+        <div class="ctrl grow">
+          <label class="ctrl-label" for="freqSlider">Tune</label>
+          <input class="fader" id="freqSlider" type="range" min="0" max="1000" step="1" value="566">
+          <div class="scale" aria-hidden="true"><span>20</span><span>200</span><span>2k</span><span>20k</span></div>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl grow">
+          <span class="ctrl-label">Presets</span>
+          <div class="presets" id="freqPresets">
+            <button type="button" data-hz="31.5">31.5</button>
+            <button type="button" data-hz="63">63</button>
+            <button type="button" data-hz="125">125</button>
+            <button type="button" data-hz="250">250</button>
+            <button type="button" data-hz="440">440</button>
+            <button type="button" data-hz="500">500</button>
+            <button type="button" data-hz="1000">1k</button>
+            <button type="button" data-hz="2000">2k</button>
+            <button type="button" data-hz="4000">4k</button>
+            <button type="button" data-hz="8000">8k</button>
+            <button type="button" data-hz="16000">16k</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl grow">
+          <label class="ctrl-label" for="levelFader">Level &mdash; <span id="levelVal">-18.0</span> dBFS</label>
+          <input class="fader" id="levelFader" type="range" min="-60" max="0" step="0.5" value="-18">
+          <div class="scale" aria-hidden="true"><span>-60</span><span>-40</span><span>-20</span><span>0</span></div>
+        </div>
+        <div class="ctrl">
+          <button class="power" id="powerBtn" type="button" aria-pressed="false">
+            <span class="led" aria-hidden="true"></span>
+            <span class="power-text">Output Off</span>
+          </button>
+          <p class="kbd-hint"><kbd>Space</kbd> toggles output</p>
+        </div>
+      </div>
+
+      <div class="readout-grid" style="margin-top:20px">
+        <div class="cell">
+          <span class="ctrl-label">Note</span>
+          <div class="val" id="noteVal">B4</div>
+          <div class="sub" id="centsVal">&plus;0 cents</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Wavelength</span>
+          <div class="val" id="lambdaVal">0.34 m</div>
+          <div class="sub">in air at 20&nbsp;&deg;C</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Period</span>
+          <div class="val" id="periodVal">1 ms</div>
+          <div class="sub">one cycle</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= RACK ELEVATION =========================== -->
+    <section class="unit" aria-labelledby="rackTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="rackTitle">Installed Modules</h2>
+        <span class="plate-model">Rack Elevation</span>
+      </div>
+      <ul class="mod-list">
+        <li><a href="/delay/">
+          <span class="mod-id">1K-DLY</span><span class="mod-name">Delay Time</span>
+          <span class="mod-desc">Distance &harr; milliseconds, corrected for air temperature. Fill and delay alignment.</span></a></li>
+        <li><a href="/db/">
+          <span class="mod-id">1K-LVL</span><span class="mod-name">Level Converter</span>
+          <span class="mod-desc">dBu &harr; dBV &harr; dBFS &harr; volts, with headroom against your converter's alignment.</span></a></li>
+        <li><a href="/rt60/">
+          <span class="mod-id">1K-RT60</span><span class="mod-name">Room Acoustics</span>
+          <span class="mod-desc">RT60 estimate and the room-mode table for any rectangular room.</span></a></li>
+        <li><a href="/note/">
+          <span class="mod-id">1K-NOTE</span><span class="mod-name">Note &harr; Frequency</span>
+          <span class="mod-desc">Pitch, frequency, wavelength, MIDI number, cents — any direction, any A4.</span></a></li>
+        <li><a href="/spl/">
+          <span class="mod-id">1K-SPL</span><span class="mod-name">SPL &amp; Power</span>
+          <span class="mod-desc">Loudspeaker SPL at distance, amplifier power for a target, and cable voltage drop.</span></a></li>
+      </ul>
+    </section>
+
+    <!-- ============================ ABOUT ================================= -->
+    <section class="unit prose" aria-labelledby="aboutTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="aboutTitle">The Subdomain Is the Frequency</h2>
+        <span class="plate-model">How this works</span>
+      </div>
+      <p>
+        Put any number in front of the domain and the generator opens tuned to it:
+        <a href="https://440.1khz.sh">440.1khz.sh</a> is concert A,
+        <a href="https://60.1khz.sh">60.1khz.sh</a> is mains hum,
+        <a href="https://16k.1khz.sh">16k.1khz.sh</a> is a hearing test you'll wish you hadn't run.
+        DNS labels can't contain a dot, so a dash stands in for the decimal point —
+        <a href="https://432-5.1khz.sh">432-5.1khz.sh</a> lands on 432.5&nbsp;Hz.
+      </p>
+      <p>
+        There's no server trickery involved. A wildcard DNS record points every subdomain at the
+        same static files, and a few lines of JavaScript read <code>window.location.hostname</code>
+        and set the dial. The sibling domain <a href="https://2khz.sh">2khz.sh</a> just redirects
+        here preset to 2&nbsp;kHz, because of course it does.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="rack-foot">
+    <hr class="foot-rule">
+    <p>
+      No ads, no tracking, no backend — the whole kit runs in your browser.
+      If it saved a soundcheck, you can
+      <!-- DONATION LINK: replace with your real Ko-fi / Buy Me a Coffee URL -->
+      <a href="https://ko-fi.com/YOUR-HANDLE" rel="noopener">chip in for the domains</a>.
+    </p>
+    <p>Tip: any number works as a subdomain — <a href="https://60.1khz.sh">60.1khz.sh</a> is mains hum.</p>
+  </footer>
+
+  <script type="module" src="/assets/js/panel-common.js"></script>
+  <script type="module" src="/assets/js/generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room Acoustics — 1kHz.sh</title>
+  <meta name="description" content="RT60 estimate (Sabine) and room-mode table for rectangular rooms: axial, tangential, and oblique modes with the Schroeder frequency.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/panel.css">
+</head>
+<body data-page="rt60">
+
+  <header class="rack-head">
+    <a class="brand" href="/">
+      <span class="brand-mark">1k<b>Hz</b>.sh</span>
+      <span class="brand-sub">Audio Field Kit</span>
+    </a>
+    <nav class="rack-nav" aria-label="Modules">
+      <a href="/" data-nav="gen">Gen</a>
+      <a href="/delay/" data-nav="delay">Delay</a>
+      <a href="/db/" data-nav="db">Level</a>
+      <a href="/rt60/" data-nav="rt60">RT60</a>
+      <a href="/note/" data-nav="note">Note</a>
+      <a href="/spl/" data-nav="spl">SPL</a>
+    </nav>
+    <a class="tuned-chip" id="tunedChip" href="/" hidden></a>
+  </header>
+
+  <main class="rack">
+    <section class="unit" aria-labelledby="rtTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h1 class="plate-name" id="rtTitle">Room Acoustics</h1>
+        <span class="plate-model">1K-RT60 &middot; Sabine</span>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl">
+          <label class="ctrl-label" for="dimL">Length</label>
+          <div class="field"><input id="dimL" type="number" step="0.1" min="0.5" value="6" autocomplete="off"></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="dimW">Width</label>
+          <div class="field"><input id="dimW" type="number" step="0.1" min="0.5" value="4.5" autocomplete="off"></div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-label" for="dimH">Height</label>
+          <div class="field"><input id="dimH" type="number" step="0.1" min="0.5" value="2.7" autocomplete="off"></div>
+        </div>
+        <div class="ctrl">
+          <span class="ctrl-label" id="rtUnitLabel">Units</span>
+          <div class="seg" id="rtUnitSeg" role="group" aria-labelledby="rtUnitLabel">
+            <button type="button" data-runit="m" aria-pressed="true"><span class="led"></span>m</button>
+            <button type="button" data-runit="ft" aria-pressed="false"><span class="led"></span>ft</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl grow">
+          <label class="ctrl-label" for="alphaSlider">Average Absorption &mdash; &alpha; = <span id="alphaVal">0.15</span></label>
+          <input class="fader" id="alphaSlider" type="range" min="0.02" max="0.50" step="0.01" value="0.15">
+          <div class="scale" aria-hidden="true"><span>tile &amp; glass</span><span>drywall room</span><span>treated</span><span>dead</span></div>
+        </div>
+        <div class="ctrl">
+          <span class="ctrl-label">Presets</span>
+          <div class="presets" id="alphaPresets">
+            <button type="button" data-alpha="0.05">Live</button>
+            <button type="button" data-alpha="0.15">Untreated</button>
+            <button type="button" data-alpha="0.25">Treated</button>
+            <button type="button" data-alpha="0.35">Studio</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-grid" style="margin-top:6px">
+        <div class="cell">
+          <span class="ctrl-label">RT60 Estimate</span>
+          <div class="val" id="rt60Val">0.62 s</div>
+          <div class="sub" id="rt60Sub">Sabine, single average &alpha;</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Volume / Surface</span>
+          <div class="val" id="volVal">72.9 m&sup3;</div>
+          <div class="sub" id="surfVal">110.7 m&sup2; boundary area</div>
+        </div>
+        <div class="cell">
+          <span class="ctrl-label">Schroeder Frequency</span>
+          <div class="val" id="schroederVal">184 Hz</div>
+          <div class="sub">modal behaviour below this</div>
+        </div>
+      </div>
+
+      <p class="footnote" style="margin-top:16px">Sabine with one average &alpha; is a planning number, not a measurement — real rooms absorb differently per band and per surface. It will still tell you whether you're treating a bathroom or a barn.</p>
+    </section>
+
+    <section class="unit" aria-labelledby="modeTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="modeTitle">Room Modes</h2>
+        <span class="plate-model" id="modeCount">below 300 Hz</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data" id="modeTable">
+          <thead>
+            <tr><th scope="col">Frequency</th><th scope="col">Mode (p&middot;q&middot;r)</th><th scope="col">Nearest Note</th><th scope="col">Type</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="footnote" style="margin-top:14px">Axial modes (one pair of surfaces) are the strongest and the ones worth chasing with traps first. Clusters of modes at nearly the same frequency are worse than evenly spread ones.</p>
+
+      <!-- ================================================================
+           AFFILIATE SLOT (dormant)
+           A contextual recommendation — e.g. a measurement mic for
+           verifying these estimates — can live here. To activate:
+             1. Fill in the link, product name, and a one-line honest note.
+             2. Remove the `affiliate-slot` class (it is display:none).
+             3. Disclose the affiliate relationship in the text.
+           Keep it to one product and one sentence. No banners.
+           ================================================================ -->
+      <aside class="affiliate-slot prose" aria-label="Recommended gear">
+        <p><!-- e.g. "Verifying these numbers takes a measurement mic — I use
+             the <a href='AFFILIATE-URL' rel='sponsored noopener'>PRODUCT</a>
+             (affiliate link)." --></p>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="rack-foot">
+    <hr class="foot-rule">
+    <p>
+      No ads, no tracking, no backend — the whole kit runs in your browser.
+      If it saved a soundcheck, you can
+      <!-- DONATION LINK: replace with your real Ko-fi / Buy Me a Coffee URL -->
+      <a href="https://ko-fi.com/YOUR-HANDLE" rel="noopener">chip in for the domains</a>.
+    </p>
+    <p>Tip: any number works as a subdomain — <a href="https://60.1khz.sh">60.1khz.sh</a> is mains hum.</p>
+  </footer>
+
+  <script type="module" src="/assets/js/panel-common.js"></script>
+  <script type="module" src="/assets/js/rt60.js"></script>
+</body>
+</html>
