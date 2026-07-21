@@ -335,6 +335,33 @@ label.ctrl-label {
   box-shadow: 0 0 6px var(--amber), 0 0 14px var(--amber-dim);
 }
 
+/* Signal picker: Tones / Noise / Moving, each its own labelled segment */
+.wave-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+}
+.wave-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.wave-group-label {
+  font-family: var(--f-silk);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--silk-dim);
+}
+.wave-group .seg { display: flex; }
+@media (max-width: 640px) {
+  .wave-group { flex: 1 1 100%; }
+  .wave-group .seg { width: 100%; }
+  .wave-group .seg button { flex: 1 1 0; justify-content: center; padding-inline: 8px; }
+}
+
 /* Readout windows */
 .led-window {
   display: inline-flex;

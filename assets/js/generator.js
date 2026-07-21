@@ -18,13 +18,32 @@ import { freqToNote, wavelength, dbToGain, fmt } from "./audio-math.js";
 
 /* ---------------------------------------------------------------- state */
 
-const SWEEP_SECONDS = 8;          // 20 Hz -> 20 kHz, then wraps
+const SWEEP_SECONDS = 8;          // full 20 Hz <-> 20 kHz traverse, then wraps
 const FREQ_MIN = 20;
 const FREQ_MAX = 20000;
+const WARBLE_RATE = 6;            // Hz — how fast the warble wobbles
+const WARBLE_DEPTH = 0.06;        // ±6% of the centre frequency
+const PULSE_RATE = 2;             // Hz — on/off gate rate for the pulse
+
+// The signal catalogue, grouped the way the front panel presents it.
+const TONES  = new Set(["sine", "triangle", "square", "saw"]);
+const NOISE  = new Set(["white", "pink", "brown", "blue"]);
+const SWEEPS = new Set(["sweep-up", "sweep-down"]);
+// OscillatorNode.type for each pitched / moving wave (noise is buffer-based).
+const OSC_TYPE = {
+  sine: "sine", triangle: "triangle", square: "square", saw: "sawtooth",
+  warble: "sine", pulse: "sine", "sweep-up": "sine", "sweep-down": "sine",
+};
+
+const isNoise = (w) => NOISE.has(w);
+const isSweep = (w) => SWEEPS.has(w);
+// Which waves take a frequency the user can dial: the tones, plus warble and
+// pulse (whose dial sets the centre). Noise and sweeps ignore it.
+const usesFreq = (w) => TONES.has(w) || w === "warble" || w === "pulse";
 
 const state = {
   freq: getTunedFrequency() ?? 1000,
-  wave: "sine",                   // sine | square | pink | white | sweep
+  wave: "sine",                   // a key in TONES / NOISE / SWEEPS, or warble | pulse
   channel: "both",                // left | both | right
   levelDb: -18,
   on: false,
@@ -36,6 +55,7 @@ let nodes = null;                 // built once, on first power-on
 let source = null;                // current oscillator / buffer source
 let sweepEpoch = 0;               // ctx time the sweep cycle chain began
 let sweepTimer = 0;
+let sweepDir = "up";              // "up" | "down", for the live readout
 
 /* ------------------------------------------------------------------ DOM */
 
@@ -99,27 +119,63 @@ function buildGraph() {
   applyChannel();
 }
 
-/** 4 s of Paul Kellet pink noise, looped. Cheap, correct enough for ears. */
+/** Scale a buffer to a target RMS, so the noise colours match in loudness. */
+function normalizeRms(data, target) {
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+  const rms = Math.sqrt(sum / data.length) || 1;
+  const g = target / rms;
+  for (let i = 0; i < data.length; i++) data[i] *= g;
+}
+
+/**
+ * A looping buffer of the requested noise colour. Cheap, correct enough for
+ * ears and a scope:
+ *   white — flat        (raw uniform samples)
+ *   pink  — −3 dB/oct   (Paul Kellet filter)
+ *   brown — −6 dB/oct   (leaky integral of white)
+ *   blue  — +3 dB/oct   (first difference of pink: differentiating adds
+ *                        +6 dB/oct, turning pink's −3 into +3)
+ */
 function makeNoiseBuffer(kind) {
-  const seconds = kind === "pink" ? 4 : 2;
+  const seconds = kind === "pink" || kind === "blue" ? 4 : 2;
   const buf = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
   const data = buf.getChannelData(0);
+  const N = data.length;
+
   if (kind === "white") {
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  } else {
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-    for (let i = 0; i < data.length; i++) {
-      const w = Math.random() * 2 - 1;
-      b0 = 0.99886 * b0 + w * 0.0555179;
-      b1 = 0.99332 * b1 + w * 0.0750759;
-      b2 = 0.96900 * b2 + w * 0.1538520;
-      b3 = 0.86650 * b3 + w * 0.3104856;
-      b4 = 0.55000 * b4 + w * 0.5329522;
-      b5 = -0.7616 * b5 - w * 0.0168980;
-      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
-      b6 = w * 0.115926;
-    }
+    for (let i = 0; i < N; i++) data[i] = Math.random() * 2 - 1;
+    return buf;
   }
+
+  if (kind === "brown") {
+    let last = 0;
+    for (let i = 0; i < N; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      data[i] = last;
+    }
+    normalizeRms(data, 0.22);
+    return buf;
+  }
+
+  // pink via Paul Kellet; blue is the first difference of that pink sequence.
+  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+  let prevPink = 0;
+  for (let i = 0; i < N; i++) {
+    const w = Math.random() * 2 - 1;
+    b0 = 0.99886 * b0 + w * 0.0555179;
+    b1 = 0.99332 * b1 + w * 0.0750759;
+    b2 = 0.96900 * b2 + w * 0.1538520;
+    b3 = 0.86650 * b3 + w * 0.3104856;
+    b4 = 0.55000 * b4 + w * 0.5329522;
+    b5 = -0.7616 * b5 - w * 0.0168980;
+    const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+    b6 = w * 0.115926;
+    if (kind === "blue") { data[i] = pink - prevPink; prevPink = pink; }
+    else data[i] = pink;
+  }
+  if (kind === "blue") normalizeRms(data, 0.22);
   return buf;
 }
 
@@ -130,6 +186,11 @@ function stopSource() {
     try { source.stop(); } catch { /* already stopped */ }
     source.disconnect();
     source._srcGain?.disconnect();
+    // Tear down any helper nodes (warble LFO, pulse gate + its LFO/DC).
+    for (const n of source._extra || []) {
+      try { n.stop?.(); } catch { /* not a scheduled source */ }
+      try { n.disconnect(); } catch { /* already gone */ }
+    }
     source = null;
   }
 }
@@ -143,35 +204,77 @@ function startSource() {
   srcGain.connect(nodes.gainL);
   srcGain.connect(nodes.gainR);
 
-  if (state.wave === "pink" || state.wave === "white") {
+  const w = state.wave;
+  const extra = [];                 // helper nodes to stop/disconnect later
+
+  if (isNoise(w)) {
     const s = ctx.createBufferSource();
-    s.buffer = makeNoiseBuffer(state.wave);
+    s.buffer = makeNoiseBuffer(w);
     s.loop = true;
     s.connect(srcGain);
     s.start();
     source = s;
   } else {
     const o = ctx.createOscillator();
-    o.type = state.wave === "square" ? "square" : "sine";
-    if (state.wave === "sweep") {
-      scheduleSweep(o);
+    o.type = OSC_TYPE[w] || "sine";
+
+    if (isSweep(w)) {
+      scheduleSweep(o, w === "sweep-down" ? "down" : "up");
     } else {
       o.frequency.value = state.freq;
     }
-    o.connect(srcGain);
+
+    if (w === "warble") {
+      // FM warble: an LFO detunes the tone ±WARBLE_DEPTH at WARBLE_RATE. Great
+      // for exciting a room without parking in a single standing-wave null.
+      const lfo = ctx.createOscillator();
+      lfo.type = "sine";
+      lfo.frequency.value = WARBLE_RATE;
+      const depth = ctx.createGain();
+      depth.gain.value = state.freq * WARBLE_DEPTH;
+      lfo.connect(depth).connect(o.frequency);
+      lfo.start();
+      extra.push(lfo, depth);
+      o.connect(srcGain);
+    } else if (w === "pulse") {
+      // Gate the tone on/off with a square LFO summed with a DC offset so the
+      // gate gain swings a clean 0..1. Good for identification and polarity.
+      const gate = ctx.createGain();
+      gate.gain.value = 0;            // driven entirely by the summed inputs below
+      const lfo = ctx.createOscillator();
+      lfo.type = "square";
+      lfo.frequency.value = PULSE_RATE;
+      const half = ctx.createGain();
+      half.gain.value = 0.5;          // square LFO -> ±0.5
+      const dc = ctx.createConstantSource();
+      dc.offset.value = 0.5;          // + 0.5 offset -> 0..1
+      lfo.connect(half).connect(gate.gain);
+      dc.connect(gate.gain);
+      lfo.start();
+      dc.start();
+      o.connect(gate).connect(srcGain);
+      extra.push(lfo, half, dc, gate);
+    } else {
+      o.connect(srcGain);
+    }
+
     o.start();
     source = o;
   }
-  source._srcGain = srcGain; // keep a handle so stopSource() can disconnect cleanly
+  source._srcGain = srcGain;          // handles for stopSource() to disconnect cleanly
+  source._extra = extra;
 }
 
-/** Chain exponential 20 Hz -> 20 kHz ramps, a couple of cycles ahead. */
-function scheduleSweep(osc) {
+/** Chain exponential sweeps in the given direction, a couple of cycles ahead. */
+function scheduleSweep(osc, dir = "up") {
+  sweepDir = dir;
+  const from = dir === "down" ? FREQ_MAX : FREQ_MIN;
+  const to   = dir === "down" ? FREQ_MIN : FREQ_MAX;
   sweepEpoch = ctx.currentTime + 0.05;
   let next = sweepEpoch;
   const scheduleCycle = (t) => {
-    osc.frequency.setValueAtTime(FREQ_MIN, t);
-    osc.frequency.exponentialRampToValueAtTime(FREQ_MAX, t + SWEEP_SECONDS);
+    osc.frequency.setValueAtTime(from, t);
+    osc.frequency.exponentialRampToValueAtTime(to, t + SWEEP_SECONDS);
   };
   scheduleCycle(next);
   next += SWEEP_SECONDS;
@@ -189,7 +292,8 @@ function scheduleSweep(osc) {
 function sweepFreqNow() {
   if (!ctx) return FREQ_MIN;
   const t = Math.max(0, ctx.currentTime - sweepEpoch) % SWEEP_SECONDS;
-  return FREQ_MIN * Math.pow(FREQ_MAX / FREQ_MIN, t / SWEEP_SECONDS);
+  const frac = sweepDir === "down" ? 1 - t / SWEEP_SECONDS : t / SWEEP_SECONDS;
+  return FREQ_MIN * Math.pow(FREQ_MAX / FREQ_MIN, frac);
 }
 
 /* ----------------------------------------------------------- apply state */
@@ -209,7 +313,7 @@ function applyLevel() {
 }
 
 function applyFreq() {
-  if (source && source.frequency && state.wave !== "sweep") {
+  if (source && source.frequency && !isSweep(state.wave)) {
     source.frequency.setTargetAtTime(state.freq, ctx.currentTime, 0.01);
   }
   el.freqInput.value = fmt(state.freq, 2);
@@ -217,15 +321,8 @@ function applyFreq() {
   updatePitchReadouts(state.freq);
 }
 
-function updatePitchReadouts(hz) {
-  const isNoise = state.wave === "pink" || state.wave === "white";
-  if (isNoise) {
-    el.note.textContent = "—";
-    el.cents.textContent = "broadband";
-    el.lambda.textContent = "—";
-    el.period.textContent = "—";
-    return;
-  }
+/** Note / wavelength / period for a single frequency (tones, warble, pulse). */
+function tonePitchReadouts(hz) {
   const n = freqToNote(hz);
   el.note.textContent = `${n.name}${n.octave}`;
   el.cents.textContent = `${n.cents >= 0 ? "+" : ""}${n.cents.toFixed(0)} cents`;
@@ -234,16 +331,34 @@ function updatePitchReadouts(hz) {
   el.period.textContent = `${fmt(1000 / hz, 3)} ms`;
 }
 
+function updatePitchReadouts(hz) {
+  if (isNoise(state.wave)) {
+    el.note.textContent = "—";
+    el.cents.textContent = "broadband";
+    el.lambda.textContent = "—";
+    el.period.textContent = "—";
+    return;
+  }
+  if (isSweep(state.wave)) {
+    el.note.textContent = "—";
+    el.cents.textContent = "full sweep";
+    el.lambda.textContent = "—";
+    el.period.textContent = "—";
+    return;
+  }
+  tonePitchReadouts(hz); // tones, warble, pulse all ride a single frequency
+}
+
 function setWave(wave) {
   state.wave = wave;
-  const tonal = wave === "sine" || wave === "square";
-  el.freqSlider.disabled = !tonal;
-  el.freqInput.disabled = !tonal;
-  el.presets.querySelectorAll("button").forEach((b) => (b.disabled = !tonal));
+  const freqActive = usesFreq(wave);
+  el.freqSlider.disabled = !freqActive;
+  el.freqInput.disabled = !freqActive;
+  el.presets.querySelectorAll("button").forEach((b) => (b.disabled = !freqActive));
   el.waveSeg.querySelectorAll("button").forEach((b) =>
     b.setAttribute("aria-pressed", String(b.dataset.wave === wave)));
   if (ctx) startSource();
-  if (tonal) applyFreq(); else updatePitchReadouts(state.freq);
+  if (freqActive) applyFreq(); else updatePitchReadouts(state.freq);
 }
 
 function setChannel(channel) {
@@ -344,11 +459,11 @@ function startScopeLoop() {
   cancelAnimationFrame(scopeRAF);
   const tick = () => {
     drawScope();
-    if (state.wave === "sweep" && state.on) {
+    if (isSweep(state.wave) && state.on) {
       const f = sweepFreqNow();
       el.freqInput.value = f.toFixed(0);
       el.freqSlider.value = Math.round(freqToSlider(f));
-      updatePitchReadouts(f);
+      tonePitchReadouts(f);
     }
     // Keep animating while the gate is open (the ramp-out tail included).
     if (state.on) scopeRAF = requestAnimationFrame(tick);
@@ -373,7 +488,7 @@ document.addEventListener("keydown", (e) => {
 
 el.freqSlider.addEventListener("input", () => {
   state.freq = sliderToFreq(parseFloat(el.freqSlider.value));
-  if (source && source.frequency) source.frequency.setTargetAtTime(state.freq, ctx.currentTime, 0.01);
+  if (source && source.frequency && !isSweep(state.wave)) source.frequency.setTargetAtTime(state.freq, ctx.currentTime, 0.01);
   el.freqInput.value = state.freq < 100 ? state.freq.toFixed(1) : state.freq.toFixed(0);
   updatePitchReadouts(state.freq);
 });

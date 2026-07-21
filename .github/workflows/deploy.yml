@@ -1,0 +1,58 @@
+name: Deploy (Cloudflare Pages)
+
+# Publishes the site to Cloudflare Pages on every push to master.
+#
+# Why Cloudflare Pages: it serves the same files for *.1khz.sh, which is what
+# keeps the subdomain gimmick (440.1khz.sh, 60.1khz.sh, …) working, and it
+# issues the wildcard TLS cert automatically. GitHub Pages can't do wildcard
+# subdomains, so the trick would break there.
+#
+# ── One-time setup ────────────────────────────────────────────────────────────
+#   1. Create a Pages project in the Cloudflare dashboard (or it is created on
+#      first deploy) named to match PROJECT below.
+#   2. Add two repository secrets (Settings → Secrets and variables → Actions):
+#         CLOUDFLARE_API_TOKEN   — a token with the "Cloudflare Pages: Edit" perm
+#         CLOUDFLARE_ACCOUNT_ID  — your account id (Cloudflare dashboard sidebar)
+#   3. Point the apex + a wildcard record at the Pages project and attach
+#      1khz.sh (and *.1khz.sh) as custom domains.
+#
+# Until the secrets exist this workflow runs but skips the publish step, so it
+# never fails a fork or a fresh clone.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: true
+
+env:
+  PROJECT: 1khz-sh   # change to match your Cloudflare Pages project name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Are the Cloudflare secrets configured?
+        id: gate
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CF_TOKEN" ]; then
+            echo "Cloudflare secrets not set — skipping publish (add them to enable deploys)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to Cloudflare Pages
+        if: steps.gate.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=${{ env.PROJECT }} --branch=master --commit-dirty=true
