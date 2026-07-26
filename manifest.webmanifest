@@ -20,6 +20,7 @@
     { "name": "Level Converter", "short_name": "Level", "url": "/db/" },
     { "name": "RT60", "short_name": "RT60", "url": "/rt60/" },
     { "name": "Note / Frequency", "short_name": "Note", "url": "/note/" },
-    { "name": "SPL & Power", "short_name": "SPL", "url": "/spl/" }
+    { "name": "SPL & Power", "short_name": "SPL", "url": "/spl/" },
+    { "name": "Formulas & Assumptions", "short_name": "Math", "url": "/math/" }
   ]
 }

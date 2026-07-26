@@ -176,8 +176,19 @@ body {
   background: var(--recess);
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
 }
+/* divides the calculators from the reference pages (Math / About) */
+.rack-nav .nav-rule {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  margin: 4px 5px;
+  background: var(--etch);
+}
 
 /* the signature: whatever frequency the hostname carried rides in the header */
+/* An author `display` beats the UA's `[hidden] { display: none }`, so the
+   empty chip would sit in the header on every untuned page without this. */
+.tuned-chip[hidden] { display: none; }
 .tuned-chip {
   display: inline-flex;
   align-items: baseline;
@@ -637,6 +648,81 @@ table.data tr.axial td:last-child { color: var(--amber-hot); }
 .footnote { font-size: 12px; color: var(--silk-dim); max-width: 68ch; }
 
 /* --------------------------------------------------------------------------
+   Reference pages (/math/, /about/) — running text, formulas, caveat lists.
+   Same rack language, just tuned for reading rather than operating.
+   -------------------------------------------------------------------------- */
+.prose h3 {
+  font-family: var(--f-silk);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--silk);
+  margin: 26px 0 8px;
+}
+.prose h3:first-of-type { margin-top: 6px; }
+.prose ul, .prose ol { max-width: 68ch; color: var(--silk); padding-left: 20px; }
+.prose li { margin: 5px 0; }
+.prose li::marker { color: var(--amber-dim); }
+.prose strong { color: var(--silk); font-weight: 600; }
+
+/* A displayed formula: the readout window, borrowed for maths. */
+.formula {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 14px;
+  color: var(--amber);
+  text-shadow: 0 0 8px var(--amber-dim);
+  background: var(--lcd);
+  border: 1px solid var(--etch);
+  border-radius: 5px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.75);
+  padding: 12px 14px;
+  margin: 12px 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+.formula .where {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--silk-dim);
+  text-shadow: none;
+  white-space: pre-wrap;
+}
+
+/* "What this assumes" — the caveats, called out rather than buried. */
+.assumes {
+  border-left: 2px solid var(--amber-dim);
+  background: rgba(255,178,87,0.035);
+  border-radius: 0 5px 5px 0;
+  padding: 10px 16px 10px 14px;
+  margin: 14px 0;
+}
+.assumes > .ctrl-label { margin-bottom: 6px; }
+.assumes ul { margin: 0; font-size: 13px; }
+
+/* Constant / definition pairs. */
+.defs {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 18px;
+  max-width: 68ch;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.defs dt {
+  font-family: var(--f-mono);
+  color: var(--amber);
+  white-space: nowrap;
+}
+.defs dd { margin: 0; color: var(--silk-dim); }
+@media (max-width: 520px) {
+  .defs { grid-template-columns: 1fr; gap: 2px; }
+  .defs dd { margin-bottom: 8px; }
+}
+
+/* --------------------------------------------------------------------------
    Module rack (homepage elevation)
    -------------------------------------------------------------------------- */
 .mod-list {
@@ -732,9 +818,6 @@ table.data tr.axial td:last-child { color: var(--amber-hot); }
   border-color: var(--amber);
   box-shadow: 0 0 16px rgba(255,178,87,0.12);
 }
-
-/* affiliate slots ship dormant — see the HTML comments where they live */
-.affiliate-slot { display: none; }
 
 /* --------------------------------------------------------------------------
    Touch: kill the double-tap zoom delay and keep tap targets comfortable on

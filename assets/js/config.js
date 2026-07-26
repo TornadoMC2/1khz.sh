@@ -1,17 +1,18 @@
 /**
  * config.js — the one place to edit the project's outward links.
  *
- * Both are placeholders. Swap in your real URLs here and the footer of every
- * page updates at once — no need to touch the HTML. Leave a value empty ("")
- * to hide that link entirely.
+ * The footer of every page reads these. Leave a value empty ("") to hide that
+ * link entirely, which is what an unconfigured donate link should stay as —
+ * better no button than a broken one.
  */
 export const SITE = {
-  // Public source repository. This is an open-source project (MIT) — point
-  // this at your GitHub repo once it exists.
-  sourceUrl: "https://github.com/YOUR-USER/1khz.sh",
+  // Public source repository. Shown in the footer as "Source on GitHub".
+  sourceUrl: "https://github.com/TornadoMC2/1khz.sh",
 
-  // Donation link. Ko-fi by default; any URL works (Buy Me a Coffee, GitHub
-  // Sponsors, PayPal…). Set to "" to drop the donate button.
-  donateUrl: "https://ko-fi.com/YOUR-HANDLE",
-  donateLabel: "Support on Ko-fi",
+  // Donation link. Empty = no donate button anywhere on the site.
+  // To turn it on, set the URL and a label, e.g.:
+  //   donateUrl: "https://ko-fi.com/your-handle",
+  //   donateLabel: "Support on Ko-fi",
+  donateUrl: "",
+  donateLabel: "Support the project",
 };

@@ -24,6 +24,10 @@ const FREQ_MAX = 20000;
 const WARBLE_RATE = 6;            // Hz — how fast the warble wobbles
 const WARBLE_DEPTH = 0.06;        // ±6% of the centre frequency
 const PULSE_RATE = 2;             // Hz — on/off gate rate for the pulse
+// Every noise colour is scaled to this RMS so switching between them never
+// jumps in level. 0.2 ≈ -14 dBFS RMS; pink and brown have a crest factor near
+// 4, which puts their peaks around 0.82 — comfortably short of full scale.
+const NOISE_RMS = 0.2;
 
 // The signal catalogue, grouped the way the front panel presents it.
 const TONES  = new Set(["sine", "triangle", "square", "saw"]);
@@ -136,6 +140,11 @@ function normalizeRms(data, target) {
  *   brown — −6 dB/oct   (leaky integral of white)
  *   blue  — +3 dB/oct   (first difference of pink: differentiating adds
  *                        +6 dB/oct, turning pink's −3 into +3)
+ *
+ * Each generator lands on its own natural amplitude (raw white is ~9 dB hotter
+ * than the filtered colours), so every buffer is normalised to NOISE_RMS on the
+ * way out. Switching colours with the PA up should change the timbre, not the
+ * level.
  */
 function makeNoiseBuffer(kind) {
   const seconds = kind === "pink" || kind === "blue" ? 4 : 2;
@@ -145,6 +154,7 @@ function makeNoiseBuffer(kind) {
 
   if (kind === "white") {
     for (let i = 0; i < N; i++) data[i] = Math.random() * 2 - 1;
+    normalizeRms(data, NOISE_RMS);
     return buf;
   }
 
@@ -155,7 +165,7 @@ function makeNoiseBuffer(kind) {
       last = (last + 0.02 * w) / 1.02;
       data[i] = last;
     }
-    normalizeRms(data, 0.22);
+    normalizeRms(data, NOISE_RMS);
     return buf;
   }
 
@@ -175,7 +185,7 @@ function makeNoiseBuffer(kind) {
     if (kind === "blue") { data[i] = pink - prevPink; prevPink = pink; }
     else data[i] = pink;
   }
-  if (kind === "blue") normalizeRms(data, 0.22);
+  normalizeRms(data, NOISE_RMS);
   return buf;
 }
 

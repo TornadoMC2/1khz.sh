@@ -11,14 +11,21 @@ shared stylesheet + vanilla ES modules.
 
 ## Commands
 
-There is no build, lint, or test tooling (`npm test` is a stub that exits 1).
-To develop locally, serve the folder — ES modules require a real origin, so
-you can't just open the HTML files directly:
+There is no build or lint tooling. To develop locally, serve the folder — ES
+modules require a real origin, so you can't just open the HTML files directly:
 
 ```sh
-python3 -m http.server 8000
+npm start          # python3 -m http.server 8000
 # then http://localhost:8000/?f=440
+npm test           # node scripts/check-site.mjs — structural checks
+npm run deploy     # npx wrangler deploy (Cloudflare Workers)
+npm run fonts      # re-vendor the woff2 subsets into assets/fonts/
 ```
+
+`npm test` is not a unit-test suite; it walks the repo and fails on the things
+a build step would otherwise catch: a page missing from the nav, a module left
+out of the service worker's precache, a dead internal link, a leftover
+placeholder URL, a page missing its `rel=canonical`. Run it before committing.
 
 Use `?f=<hz>` during local testing to simulate arriving on a tuned subdomain
 (see below) since localhost can't carry a wildcard-subdomain hostname.
@@ -33,8 +40,11 @@ static files for every subdomain, and `assets/js/host-freq.js` reads
 `window.location.hostname` client-side to preset the dial. A `?f=` query
 param does the same job and takes priority over the hostname; every page's
 JS module calls `getTunedFrequency()` (query wins, else hostname, else null)
-on load to decide its initial value. `2khz.sh` is a sibling domain that
-`redirectSiblingDomains()` bounces to `1khz.sh/?f=2000`.
+on load to decide its initial value.
+
+Because every subdomain serves identical HTML, **every page must carry a
+`rel="canonical"` pointing at the apex URL** or the whole site reads as
+duplicate content. `npm test` enforces this.
 
 **Module layout** — one directory per calculator, each self-contained:
 
@@ -46,6 +56,8 @@ on load to decide its initial value. `2khz.sh` is a sibling domain that
 | `/rt60/` | `assets/js/rt60.js` | Sabine RT60 + room modes (1K-RT60) |
 | `/note/` | `assets/js/note.js` | Note ↔ frequency ↔ MIDI (1K-NOTE) |
 | `/spl/` | `assets/js/spl.js` | SPL, amp power, cable drop (1K-SPL) |
+| `/math/` | — (static) | Formulas, constants, assumptions (1K-REF) |
+| `/about/` | — (static) | Trust, privacy, verification, safety (1K-INFO) |
 
 **Shared modules** (`assets/js/`):
 
@@ -56,10 +68,12 @@ on load to decide its initial value. `2khz.sh` is a sibling domain that
   SPL/power/cable-drop math, and the `fmt()` number formatter). Keep new
   formulas here, not inline in a page's script — pages import only what they
   need.
-- `panel-common.js` — runs on every page: fires the sibling-domain redirect,
-  marks the active nav item via `document.body.dataset.page`, and shows the
-  "Tuned" header chip (`#tunedChip`) when a frequency was carried in via
-  hostname or `?f=`.
+- `panel-common.js` — runs on every page: marks the active nav item via
+  `document.body.dataset.page`, shows the "Tuned" header chip (`#tunedChip`)
+  when a frequency was carried in via hostname or `?f=`, fills the footer links
+  from `config.js`, and registers the service worker.
+- `config.js` — the project's outward links (source repo, optional donation).
+  An empty `donateUrl` removes the button entirely; never ship a placeholder.
 - `panel.css` — the single shared stylesheet (rack/panel visual language:
   `.unit`, `.plate-head`, `.ctrl-row`, `.seg`, `.fader`, `.readout-grid`,
   etc.) used by every page.
@@ -89,3 +103,23 @@ power-on gesture (browser autoplay policy), and the scope always taps
   `rack-nav` across all existing pages plus a rack-elevation entry on `/`.
 - Keep the whole project dependency- and build-step-free; there is no
   bundler or transpilation, so all JS must run as-authored in the browser.
+- Any new formula must also be written up on `/math/` — the equation, its
+  constants, and an honest `.assumes` block saying where it stops being
+  trustworthy. The site's credibility rests on that page being complete.
+- The privacy claims on `/about/` are specific and CI-enforced: no cookies, no
+  `localStorage`/`sessionStorage`/IndexedDB, no beacons, no inline scripts, no
+  third-party requests of any kind. Don't add one without changing that page.
+- Bump `CACHE` in `sw.js` and add any new page/module/font to its `PRECACHE`
+  list when shipping changes (`npm test` catches the second half of that).
+- New pages also need: a `rel=canonical`, the og: meta block, a `sitemap.xml`
+  entry, and a nav link on *every* other page. `npm test` checks all of these.
+
+## Deployment
+
+Cloudflare Workers with static assets (`wrangler.jsonc`), because it's the only
+free option that serves `*.1khz.sh` — Cloudflare Pages and GitHub Pages both
+lack wildcard custom-domain support, which would break the core gimmick. The
+two routes in `wrangler.jsonc` (apex + wildcard) are load-bearing; CI fails if
+the wildcard one disappears. `.assetsignore` keeps repo files out of the
+deploy — add to it when adding a top-level developer file. Full runbook,
+including DNS records and the nginx alternative, is in `DEPLOYING.md`.

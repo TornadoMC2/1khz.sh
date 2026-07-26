@@ -77,10 +77,13 @@ export function schroederFreq(t60, volume) {
 
 /**
  * Room modes for a rectangular room (dimensions in metres).
- * f = (c/2) · sqrt((p/L)² + (q/W)² + (r/H)²)
+ * f = (c/2) · sqrt((p/L)² + (q/W)² + (r/H)²)   — Rayleigh's equation
  * Returns modes up to maxHz, sorted, classified axial/tangential/oblique.
+ *
+ * c defaults to the same 20 °C figure every other module uses, so a wavelength
+ * read off /note/ and a mode read off /rt60/ agree with each other.
  */
-export function roomModes(l, w, h, { maxHz = 300, maxIndex = 6, c = 343.2 } = {}) {
+export function roomModes(l, w, h, { maxHz = 300, maxIndex = 6, c = speedOfSound(20) } = {}) {
   const modes = [];
   for (let p = 0; p <= maxIndex; p++) {
     for (let q = 0; q <= maxIndex; q++) {

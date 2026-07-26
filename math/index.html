@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Formulas &amp; Assumptions — 1kHz.sh</title>
+  <meta name="description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and where each estimate stops being trustworthy.">
+  <link rel="canonical" href="https://1khz.sh/math/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:title" content="Formulas &amp; Assumptions — 1kHz.sh">
+  <meta property="og:description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and where each estimate stops being trustworthy.">
+  <meta property="og:url" content="https://1khz.sh/math/">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/panel.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0a0b0d">
+  <link rel="apple-touch-icon" href="/assets/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+</head>
+<body data-page="math">
+
+  <header class="rack-head">
+    <a class="brand" href="/">
+      <span class="brand-mark">1k<b>Hz</b>.sh</span>
+      <span class="brand-sub">Audio Field Kit</span>
+    </a>
+    <nav class="rack-nav" aria-label="Modules">
+      <a href="/" data-nav="gen">Gen</a>
+      <a href="/delay/" data-nav="delay">Delay</a>
+      <a href="/db/" data-nav="db">Level</a>
+      <a href="/rt60/" data-nav="rt60">RT60</a>
+      <a href="/note/" data-nav="note">Note</a>
+      <a href="/spl/" data-nav="spl">SPL</a>
+      <span class="nav-rule" aria-hidden="true"></span>
+      <a href="/math/" data-nav="math">Math</a>
+      <a href="/about/" data-nav="about">About</a>
+    </nav>
+    <a class="tuned-chip" id="tunedChip" href="/" hidden></a>
+  </header>
+
+  <main class="rack">
+
+    <!-- ============================ INTRO ================================ -->
+    <section class="unit prose" aria-labelledby="mathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h1 class="plate-name" id="mathTitle">Formulas &amp; Assumptions</h1>
+        <span class="plate-model">1K-REF &middot; show your working</span>
+      </div>
+      <p>
+        Every number this site shows you comes from one of the formulas below.
+        They are all standard acoustics and audio engineering &mdash; nothing here is
+        invented, and nothing is fitted to data. They live as pure functions in a
+        single file, <code>assets/js/audio-math.js</code>, which you are welcome to
+        read, check, and copy.
+      </p>
+      <p>
+        The formulas matter less than the assumptions underneath them. Most audio
+        maths is exact in a physics textbook and approximate in a room with a PA in
+        it, so each section below says plainly what it takes for granted and where
+        it starts to lie to you. <strong>Treat all of it as planning numbers, not
+        measurements.</strong> A calculator tells you what to expect; a measurement
+        microphone tells you what happened.
+      </p>
+    </section>
+
+    <!-- ========================== CONSTANTS ============================== -->
+    <section class="unit prose" aria-labelledby="constTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="constTitle">Shared Constants</h2>
+        <span class="plate-model">used by more than one module</span>
+      </div>
+
+      <h3>Speed of sound in air</h3>
+      <span class="formula">c(T) = 331.3 + 0.606 &middot; T
+<span class="where">c = speed of sound, m/s     T = air temperature, &deg;C
+c(20 &deg;C) = 343.4 m/s &asymp; 1127 ft/s</span></span>
+      <p>
+        This is the linear approximation to the exact ideal-gas relation
+        <code>c = 331.3 &middot; &radic;(1 + T/273.15)</code>. Every module that needs a
+        speed of sound uses this same function, so a wavelength read off
+        <a href="/note/">1K-NOTE</a> and a room mode read off
+        <a href="/rt60/">1K-RT60</a> agree with each other.
+      </p>
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>Dry air at sea level.</strong> Humidity raises <code>c</code> by
+            only a few tenths of a m/s at concert temperatures, so it is ignored.</li>
+          <li><strong>Temperature, not pressure.</strong> For an ideal gas the speed of
+            sound depends on temperature alone, so altitude barely moves this number
+            &mdash; the thinner air at altitude is also colder, and that is what changes it.</li>
+          <li><strong>The linear form drifts at extremes.</strong> Against the exact
+            relation it is dead-on at 0 &deg;C, off by 0.2 m/s at 20 &deg;C, and off by
+            0.8 m/s (0.23%) at 40 &deg;C. Between &minus;20 &deg;C and +40 &deg;C the
+            error stays under 1 m/s, which is far smaller than the error in guessing
+            the room's temperature in the first place.</li>
+          <li><strong>Modules that show a temperature field use yours.</strong> Ones
+            that don't (wavelength readouts on the generator and note pages) assume
+            20 &deg;C and say so on the panel.</li>
+        </ul>
+      </div>
+
+      <h3>Wavelength and period</h3>
+      <span class="formula">&lambda; = c / f          T = 1 / f
+<span class="where">&lambda; = wavelength, m     f = frequency, Hz     T = period, s</span></span>
+      <p>
+        Both are exact by definition. The only assumption they carry is whichever
+        <code>c</code> went into them.
+      </p>
+    </section>
+
+    <!-- ============================ 1K-GEN =============================== -->
+    <section class="unit prose" aria-labelledby="genMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="genMathTitle">Signal Generator</h2>
+        <span class="plate-model">1K-GEN &middot; <a href="/">open the module</a></span>
+      </div>
+
+      <h3>Frequency dial</h3>
+      <span class="formula">f = 20 &middot; (20000 / 20) ^ (pos / 1000)
+<span class="where">pos = fader position, 0&hellip;1000</span></span>
+      <p>
+        A logarithmic taper, so each octave takes the same amount of travel &mdash;
+        the same reason graphic EQs are laid out that way. The typed field accepts
+        <code>440</code>, <code>1.5k</code>, or <code>16khz</code> and is clamped to
+        20 Hz &ndash; 20 kHz.
+      </p>
+
+      <h3>Level</h3>
+      <span class="formula">gain = 10 ^ (dBFS / 20)
+<span class="where">applied to a source whose peak amplitude is 1.0</span></span>
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>The fader is peak dBFS, not RMS.</strong> A sine at 0 dBFS peak
+            measures &minus;3.01 dBFS RMS. The fader defaults to &minus;18 dBFS, which
+            is quiet enough to plug in safely and hot enough to see on a meter.</li>
+          <li><strong>dBFS here is digital full scale at the browser output.</strong>
+            It is not a calibrated output voltage and it is not SPL. Your OS volume,
+            your interface's output trim, and your amp all sit between this number and
+            the air. Set gain structure with a meter, not with this fader.</li>
+          <li><strong>Noise colours are matched to each other, not to the tones.</strong>
+            All four are normalised to the same RMS (0.2, about &minus;14 dBFS RMS) so
+            switching between them changes the timbre and not the level. A tone at the
+            same fader setting will be louder.</li>
+          <li><strong>Sample rate is whatever your browser picked</strong> &mdash;
+            usually 48 kHz, occasionally 44.1. Nothing here goes near Nyquist, so it
+            doesn't matter.</li>
+        </ul>
+      </div>
+
+      <h3>How each signal is made</h3>
+      <dl class="defs">
+        <dt>Sine, Tri, Square, Saw</dt>
+        <dd>Native Web Audio oscillators. The browser band-limits the harmonic-rich
+          shapes, so they don't alias, but their top harmonics roll off approaching
+          Nyquist &mdash; a 5 kHz square is not a mathematically perfect square.</dd>
+        <dt>White</dt>
+        <dd>Uniform random samples. Flat power per hertz.</dd>
+        <dt>Pink</dt>
+        <dd>Paul Kellet's filter approximation, &minus;3 dB/octave (equal energy per
+          octave). It tracks true pink within a fraction of a dB across the audio band
+          &mdash; close enough for setting a system, not a laboratory reference.</dd>
+        <dt>Brown</dt>
+        <dd>Leaky integral of white, &minus;6 dB/octave.</dd>
+        <dt>Blue</dt>
+        <dd>First difference of the pink sequence. Differentiating adds +6 dB/octave,
+          turning &minus;3 into +3 dB/octave.</dd>
+        <dt>Sweep &uarr; / &darr;</dt>
+        <dd>An exponential ramp across 20 Hz &ndash; 20 kHz in 8 seconds, chained so it
+          repeats seamlessly. Exponential means constant time per octave: about 0.8 s
+          for each of the ~10 octaves.</dd>
+        <dt>Warble</dt>
+        <dd>The tone frequency-modulated &plusmn;6% at 6 Hz. That is almost exactly
+          &plusmn;one semitone, which is enough spread to stop the tone parking in a
+          single standing-wave null while you walk a room.</dd>
+        <dt>Pulse</dt>
+        <dd>The tone gated on and off at 2 Hz, 50% duty. The gate is instantaneous, so
+          every edge is broadband &mdash; that click is exactly what makes it good for
+          finding which box is which, and exactly why it isn't a clean tone burst.</dd>
+      </dl>
+      <div class="assumes">
+        <span class="ctrl-label">Two things the noise generator is not</span>
+        <ul>
+          <li><strong>The noise buffers loop</strong> (2 s for white and brown, 4 s for
+            pink and blue). A looped buffer is strictly a periodic signal, so its
+            spectrum is a dense comb at multiples of 0.25&ndash;0.5 Hz rather than truly
+            continuous. Inaudible, but a long-window FFT will see it.</li>
+          <li><strong>The oscilloscope is not a measurement.</strong> It taps the signal
+            this page generates, after the output switch. It shows you what is being
+            sent, never what your room, speaker, or microphone did with it.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================ 1K-DLY =============================== -->
+    <section class="unit prose" aria-labelledby="dlyMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="dlyMathTitle">Delay Time</h2>
+        <span class="plate-model">1K-DLY &middot; <a href="/delay/">open the module</a></span>
+      </div>
+
+      <span class="formula">t = d / c                    samples = t &middot; f&#8347;
+<span class="where">t = time, s     d = distance, m     c = speed of sound at your temperature
+f&#8347; = sample rate, Hz     round trip = 2t</span></span>
+      <p>
+        At 20 &deg;C sound covers about 2.91 ms per metre, or 0.89 ms per foot &mdash;
+        which is where the old "a foot per millisecond" rule comes from. It is
+        accurate to about 11%, and the temperature correction is why the same delay
+        ring sounds right at load-in and smeared at doors.
+      </p>
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>A straight line through open air.</strong> No diffraction around
+            structures, no reflection paths, no sound travelling through the stage deck
+            (which is faster and arrives first).</li>
+          <li><strong>Still air at a uniform temperature.</strong> Outdoors neither
+            holds. Wind adds or subtracts its own speed along the path, and a hot field
+            under cooler air bends sound upward &mdash; both audible over a long throw
+            to a delay tower.</li>
+          <li><strong>Acoustic propagation only.</strong> This is the flight time
+            through air. It does not include your console latency, network audio
+            latency, amplifier DSP, or speaker processing. Add those separately; on a
+            modern digital rig they are easily worth several milliseconds.</li>
+          <li><strong>Alignment is not just time.</strong> Getting the delay right lines
+            up arrival; it does not fix polarity, phase response through the crossover
+            region, or level. Time alignment is one of the three.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================ 1K-LVL =============================== -->
+    <section class="unit prose" aria-labelledby="lvlMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="lvlMathTitle">Level Converter</h2>
+        <span class="plate-model">1K-LVL &middot; <a href="/db/">open the module</a></span>
+      </div>
+
+      <span class="formula">dBu  = 20 &middot; log&#8321;&#8320;(V / 0.774597)
+dBV  = 20 &middot; log&#8321;&#8320;(V / 1)
+dBFS = dBu &minus; alignment
+<span class="where">V = RMS volts
+0.774597 V = &radic;(1 mW &times; 600 &Omega;), the definition of 0 dBu
+alignment = the analogue level your converter calls 0 dBFS, in dBu</span></span>
+      <p>
+        dBu and dBV differ by a fixed <strong>2.2185 dB</strong> forever, because they
+        are just two different reference voltages. So consumer &minus;10 dBV nominal is
+        &minus;7.78 dBu, which is 11.78 dB below the +4 dBu pro nominal &mdash; the
+        real reason that DJ mixer never seems loud enough.
+      </p>
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>RMS volts of a sine wave.</strong> Feed it programme material and
+            the peak-to-RMS relationship changes with the crest factor of whatever you
+            are sending.</li>
+          <li><strong>Voltage transfer, not power transfer.</strong> The 600 &Omega; in
+            the definition of dBu is historical, from telephone lines. Modern gear
+            bridges &mdash; a high-impedance input across a low-impedance output &mdash;
+            so no 600 &Omega; load is implied and none should be connected.</li>
+          <li><strong>dBFS is not absolute.</strong> There is no universal analogue
+            level for 0 dBFS; it is a property of your converter. Common alignments are
+            +24 dBu (SMPTE RP155, typical in the US), +18 dBu (EBU R68, typical in
+            Europe), and +20 dBu (common in Japan). Pick the one your interface actually
+            uses &mdash; guess wrong and every dBFS figure is off by 6 dB.</li>
+          <li><strong>Headroom here is arithmetic, not a spec.</strong> "Alignment minus
+            nominal" tells you the margin your converter allows above nominal. It says
+            nothing about where your preamp, console bus, or amplifier actually clips,
+            which are usually lower.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================== 1K-RT60 =============================== -->
+    <section class="unit prose" aria-labelledby="rtMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="rtMathTitle">Room Acoustics</h2>
+        <span class="plate-model">1K-RT60 &middot; <a href="/rt60/">open the module</a></span>
+      </div>
+
+      <h3>Reverberation time (Sabine)</h3>
+      <span class="formula">RT60 = 0.161 &middot; V / (S &middot; &alpha;&#772;)
+<span class="where">V = room volume, m&sup3;     S = total boundary area, m&sup2;
+&alpha;&#772; = average absorption coefficient, 0&hellip;1
+0.161 = 24 &middot; ln(10) / c, the metric Sabine constant</span></span>
+
+      <h3>Schroeder frequency</h3>
+      <span class="formula">f&#8347; = 2000 &middot; &radic;(RT60 / V)
+<span class="where">below f&#8347; the room behaves modally; above it, statistically</span></span>
+
+      <h3>Room modes (Rayleigh)</h3>
+      <span class="formula">f(p,q,r) = (c / 2) &middot; &radic;( (p/L)&sup2; + (q/W)&sup2; + (r/H)&sup2; )
+<span class="where">L, W, H = room dimensions, m     p, q, r = mode indices, 0, 1, 2, &hellip;
+one index non-zero = axial      two = tangential      three = oblique</span></span>
+      <p>
+        Axial modes bounce between one opposed pair of surfaces and carry the most
+        energy, which is why they are the ones worth chasing with traps first.
+        Tangential and oblique modes are progressively weaker. Modes bunched at nearly
+        the same frequency are worse than the same number spread evenly.
+      </p>
+
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>Sabine over-predicts in absorbent rooms.</strong> It assumes a
+            perfectly diffuse field and breaks down as absorption rises. Compared with
+            the Eyring formula it reads about 3% long at &alpha;&#772;&nbsp;=&nbsp;0.05,
+            8% long at 0.15, 12% at 0.2, 23% at 0.35, and 39% at 0.5. Above roughly
+            &alpha;&#772;&nbsp;=&nbsp;0.2, treat the answer as an optimistic upper bound.</li>
+          <li><strong>Absorption is spread evenly.</strong> Sabine assumes it. Real rooms
+            put all of it on one wall and the ceiling, which makes the decay
+            direction-dependent in a way a single number cannot express.</li>
+          <li><strong>One broadband &alpha;&#772; stands in for a frequency response.</strong>
+            Real materials vary enormously with frequency &mdash; 25 mm of foam might be
+            0.9 at 2 kHz and 0.1 at 125 Hz. A single average will not predict the bass
+            decay that is usually the actual problem.</li>
+          <li><strong>Air absorption is ignored.</strong> Above about 2 kHz in a large
+            room, air itself absorbs meaningfully and the real RT60 comes in shorter
+            than this.</li>
+          <li><strong>The room is an empty rectangular box with rigid walls.</strong>
+            People, seating, curtains, and gear all absorb; an audience can halve the
+            RT60 of a hall. Non-rectangular rooms don't have this mode series at all,
+            and real walls flex, which damps and shifts modes downward.</li>
+          <li><strong>The mode table is truncated.</strong> Indices up to 6, frequencies
+            below 300 Hz, and the first 48 rows shown &mdash; enough for the range where
+            modes are audible individually.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================== 1K-NOTE =============================== -->
+    <section class="unit prose" aria-labelledby="noteMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="noteMathTitle">Note &harr; Frequency</h2>
+        <span class="plate-model">1K-NOTE &middot; <a href="/note/">open the module</a></span>
+      </div>
+
+      <span class="formula">f = A&#8324; &middot; 2 ^ ((m &minus; 69) / 12)
+m = 69 + 12 &middot; log&#8322;(f / A&#8324;)
+cents = 1200 &middot; log&#8322;(f&#8322; / f&#8321;)
+<span class="where">m = MIDI note number     A&#8324; = reference pitch, default 440 Hz (ISO 16)
+MIDI 69 = A4     MIDI 60 = C4     one semitone = 100 cents &asymp; 5.95%</span></span>
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>Twelve-tone equal temperament, always.</strong> Every semitone is
+            an identical ratio of 2^(1/12). Just intonation, meantone, and historical
+            temperaments will disagree with this by up to ~20 cents on some intervals.</li>
+          <li><strong>No stretch tuning.</strong> Real pianos are tuned progressively
+            sharp at the top and flat at the bottom to match string inharmonicity, by as
+            much as 30 cents at the extremes. This page shows the mathematical grid.</li>
+          <li><strong>Octave numbering is the scientific convention</strong>, where MIDI
+            60 is C4. The MIDI specification never defined octave names, so some
+            manufacturers &mdash; Yamaha most notably &mdash; call that same note C3.
+            The frequency is identical either way; only the label moves.</li>
+          <li><strong>Wavelengths on this page use 20 &deg;C.</strong> Use
+            <a href="/delay/">1K-DLY</a> if you need a different temperature.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================ 1K-SPL =============================== -->
+    <section class="unit prose" aria-labelledby="splMathTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="splMathTitle">SPL &amp; Power</h2>
+        <span class="plate-model">1K-SPL &middot; <a href="/spl/">open the module</a></span>
+      </div>
+
+      <h3>SPL at a distance</h3>
+      <span class="formula">SPL = sensitivity + 10 &middot; log&#8321;&#8320;(W) &minus; 20 &middot; log&#8321;&#8320;(d)
+<span class="where">sensitivity = dB SPL at 1 W / 1 m     W = watts     d = distance, m
+&minus;6 dB per doubling of distance</span></span>
+
+      <h3>Power for a target SPL</h3>
+      <span class="formula">W = 10 ^ ( (target + headroom + 20 &middot; log&#8321;&#8320;(d) &minus; sensitivity) / 10 )</span>
+      <p>
+        Because power is a 10&middot;log quantity, every 3 dB of headroom doubles the
+        amplifier you need. That is the arithmetic behind "we can't just turn it up" —
+        10 dB more SPL is ten times the power, and eventually the answer is a bigger PA
+        rather than a hotter amp.
+      </p>
+
+      <h3>Speaker cable voltage drop</h3>
+      <span class="formula">R&#8343;&#8338;&#8338;&#8346; = 2 &middot; length &middot; R&#8339;&#8337;&#8347; &#8344;&#8337;&#8348;&#8337;&#8347;
+loss (dB) = 20 &middot; log&#8321;&#8320;( Z / (Z + R&#8343;&#8338;&#8338;&#8346;) )
+P&#8339;&#8336;&#8331;&#8339;&#8337; = I&sup2; &middot; R&#8343;&#8338;&#8338;&#8346;,  where I = &radic;(W / Z)
+<span class="where">Z = nominal load impedance, &Omega;     length = one-way run
+resistance table = solid copper at 20 &deg;C, per conductor</span></span>
+      <p>
+        The cable and the speaker form a voltage divider, so whatever fraction of the
+        resistance lives in the cable is the fraction of your amplifier you paid for
+        and did not use. Keep the loss under about 0.5 dB and stop worrying about it.
+      </p>
+
+      <div class="assumes">
+        <span class="ctrl-label">What this assumes</span>
+        <ul>
+          <li><strong>Free field, one source, on axis.</strong> Anechoic conditions with
+            nothing to reflect off. Indoors the reverberant field adds energy, so real
+            SPL at the back of a room is <em>higher</em> than this predicts, not lower.</li>
+          <li><strong>Inverse square law, which line arrays do not obey.</strong> A point
+            source loses 6 dB per doubling of distance. A line array behaves closer to a
+            line source in its near field and loses nearer 3 dB per doubling, so this
+            calculator will badly under-read for arrays at distance.</li>
+          <li><strong>One box.</strong> Coherent sources sum; two identical boxes are
+            up to 6 dB louder, not 3. Arrays, subs in cardioid, and coupled stacks all
+            need their own maths.</li>
+          <li><strong>No air absorption.</strong> Over a long throw the top octaves lose
+            real level to the atmosphere (see ISO 9613-1), so a distant seat is quieter
+            <em>and</em> duller than this suggests.</li>
+          <li><strong>Sensitivity is the manufacturer's number</strong>, usually measured
+            anechoically, on axis, and quoted optimistically. It is often stated as
+            2.83 V/1 m rather than 1 W/1 m &mdash; identical only into 8 &Omega;, and
+            3 dB apart into 4 &Omega;.</li>
+          <li><strong>No power compression.</strong> Voice coils heat up and lose
+            sensitivity under sustained power &mdash; commonly 2&ndash;6 dB. Treat the
+            computed SPL as a ceiling you will not quite reach.</li>
+          <li><strong>Cable maths is DC resistance only.</strong> Skin effect is
+            negligible at audio frequencies in these gauges, and cable inductance and
+            capacitance don't matter over speaker runs. Amplifier output impedance is
+            taken as zero.</li>
+          <li><strong>The load is treated as a constant resistor.</strong> A real
+            driver's impedance swings widely with frequency &mdash; a nominal 8 &Omega;
+            box may dip near 5 &Omega; and rise past 40 &Omega; at resonance &mdash; so
+            the true loss varies across the band. The nominal figure is the honest
+            middle of it.</li>
+          <li><strong>Copper at 20 &deg;C, solid conductor.</strong> Resistance rises
+            about 0.39% per &deg;C, so cable baking on hot asphalt reads higher. Stranded
+            cable of the same AWG runs roughly 2% higher than solid because the strands
+            spiral.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================== SOURCES =============================== -->
+    <section class="unit prose" aria-labelledby="srcTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="srcTitle">Where These Come From</h2>
+        <span class="plate-model">standard references</span>
+      </div>
+      <p>
+        None of this is original work. These are the textbook sources for the formulas
+        above, listed so you can check them against something that isn't a website you
+        found on a weird domain name.
+      </p>
+      <ul>
+        <li><strong>Sabine, W. C.</strong> &mdash; <em>Collected Papers on Acoustics</em>
+          (1922). The reverberation formula.</li>
+        <li><strong>Eyring, C. F.</strong> &mdash; "Reverberation Time in 'Dead' Rooms",
+          <em>JASA</em> (1930). The correction for absorbent rooms.</li>
+        <li><strong>Schroeder, M. R.</strong> &mdash; "The Schroeder Frequency Revisited",
+          <em>JASA</em> (1996). The modal / statistical crossover.</li>
+        <li><strong>Rayleigh, J. W. S.</strong> &mdash; <em>The Theory of Sound</em>
+          (1877). Rectangular-room modes.</li>
+        <li><strong>ISO 16</strong> &mdash; standard tuning pitch, A4 = 440 Hz.</li>
+        <li><strong>ISO 9613-1</strong> &mdash; absorption of sound by the atmosphere.</li>
+        <li><strong>SMPTE RP155</strong> and <strong>EBU R68</strong> &mdash; converter
+          alignment levels (+24 dBu and +18 dBu).</li>
+        <li><strong>Standard copper wire tables</strong> &mdash; AWG resistance per
+          1000 ft for solid copper at 20 &deg;C.</li>
+        <li><strong>Paul Kellet's pink noise filter</strong>, from the musicdsp.org
+          archive &mdash; the filter coefficients used by the noise generator.</li>
+      </ul>
+      <p class="footnote" style="margin-top:18px">
+        Found a mistake? That's a genuine favour &mdash; the formulas are all in one
+        short file and corrections are welcome on
+        <a href="https://github.com/TornadoMC2/1khz.sh/issues">the issue tracker</a>.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="rack-foot">
+    <hr class="foot-rule">
+    <p>
+      Every number on this page is worked out in your browser. No accounts, no
+      cookies, no analytics, no backend &mdash; nothing you type is sent anywhere,
+      and the kit keeps working with the network off. Free and open source under
+      the MIT licence.
+    </p>
+    <nav class="foot-links" aria-label="Project">
+      <!-- Source and donation links are set from /assets/js/config.js. -->
+      <a data-site="source" rel="noopener noreferrer" target="_blank" aria-label="Source code on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-label>Source on GitHub</span>
+      </a>
+      <a data-site="donate" class="foot-donate" rel="noopener noreferrer" target="_blank" aria-label="Support the project">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 14.25l-1.02-.93C3.4 10.07 1 7.9 1 5.25 1 3.42 2.42 2 4.25 2 5.28 2 6.27 2.48 8 4c1.73-1.52 2.72-2 3.75-2C13.58 2 15 3.42 15 5.25c0 2.65-2.4 4.82-5.98 8.07L8 14.25z"/></svg>
+        <span data-label>Support the project</span>
+      </a>
+      <a href="/about/">About &amp; privacy</a>
+      <a href="/math/">Formulas &amp; assumptions</a>
+    </nav>
+  </footer>
+
+  <script type="module" src="/assets/js/panel-common.js"></script>
+</body>
+</html>
