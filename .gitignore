@@ -1,0 +1,7 @@
+# Wrangler's local build/cache state, created by `npx wrangler deploy`.
+.wrangler/
+
+# Only ever present if someone installs wrangler locally rather than via npx.
+node_modules/
+
+.DS_Store

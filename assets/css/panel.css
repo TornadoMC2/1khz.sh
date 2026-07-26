@@ -829,15 +829,79 @@ input[type="range"].fader, .field input, .field select {
 }
 
 @media (max-width: 640px) {
-  .rack-head { gap: 10px; }
+  .rack-head {
+    gap: 9px 10px;
+    padding-top: 13px;
+    padding-bottom: 11px;
+  }
+  /* Lay the brand out along one line instead of two. That buys back most of
+     the height the second nav row costs, so the whole kit becomes visible
+     without the header eating any more of a phone screen than it used to. */
+  .brand {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+  }
+  .brand-mark { font-size: 21px; }
+  .brand-sub { font-size: 9.5px; letter-spacing: 0.2em; margin-top: 0; }
   .tuned-chip { order: 2; margin-left: auto; }
-  .rack-nav { order: 3; flex-basis: 100%; margin-left: 0; }
+
+  /* The nav becomes a 4x2 grid instead of a horizontal scroller. Eight
+     destinations do not fit across a phone, and a scroller hid the last two
+     (Math and About) off the right edge with nothing to suggest they existed.
+     A grid shows the whole kit at once and gives every item the same
+     full-width tap target. */
+  .rack-nav {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    overflow-x: visible;   /* nothing left to scroll */
+    padding-bottom: 0;
+  }
+  /* A vertical divider means nothing once the items are on two rows. */
+  .rack-nav .nav-rule { display: none; }
+
+  /* Each item reads as a key: bordered, centred, roomy enough for hurried
+     hands at load-in. */
+  .rack-nav a {
+    padding: 9px 3px;
+    text-align: center;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    border-color: var(--etch);
+    background: linear-gradient(180deg, #202429 0%, #181b1f 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  /* Reference pages sit visually below the six working tools. */
+  .rack-nav a[data-nav="math"],
+  .rack-nav a[data-nav="about"] {
+    background: none;
+    box-shadow: none;
+    border-color: transparent;
+  }
+  /* The current page still has to win against those backgrounds. */
+  .rack-nav a[aria-current="page"] {
+    color: var(--amber);
+    border-color: var(--amber-dim);
+    background: var(--recess);
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.7);
+  }
 
   /* roomier hit areas for gloved/hurried hands at load-in */
-  .rack-nav a { padding: 9px 12px; }
   .seg button { padding: 11px 14px; }
   .presets button { padding: 8px 12px; font-size: 13px; }
   .field input, .field select { font-size: 16px; } /* 16px stops iOS zoom-on-focus */
+}
+
+/* Narrower than any phone still in circulation. Three columns rather than
+   four keeps the labels off each other; the extra row is affordable here
+   because there is nothing else competing for the width. */
+@media (max-width: 300px) {
+  .rack-nav { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* --------------------------------------------------------------------------
