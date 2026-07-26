@@ -1,0 +1,39 @@
+{
+  // Cloudflare Workers config — this project ships static assets and no Worker
+  // code at all (there is no "main" entry). Wrangler uploads the directory and
+  // Cloudflare serves it from the edge.
+  //
+  // Why Workers and not Pages: the whole point of this site is that *any*
+  // subdomain is a frequency, and Cloudflare Pages does not support wildcard
+  // custom domains. Worker *routes* do. See DEPLOYING.md for the full setup.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "1khz-sh",
+  "compatibility_date": "2026-07-01",
+
+  "assets": {
+    // The repo root is the site — there is no build step to point at.
+    "directory": "./",
+    // Serve /404.html for anything that doesn't match a file, rather than
+    // rewriting everything to index.html the way an SPA would.
+    "not_found_handling": "404-page",
+    // /delay/index.html is reachable as /delay/ — keep the trailing-slash URLs
+    // canonical instead of also exposing /delay/index.html.
+    "html_handling": "auto-trailing-slash"
+  },
+
+  // Both routes point at this one Worker. The apex and the wildcard are listed
+  // separately on purpose: a single "*1khz.sh/*" would also match hostnames
+  // like "not1khz.sh".
+  //
+  // zone_name must be the zone as it appears in your Cloudflare dashboard.
+  "routes": [
+    { "pattern": "1khz.sh/*", "zone_name": "1khz.sh" },
+    { "pattern": "*.1khz.sh/*", "zone_name": "1khz.sh" }
+  ],
+
+  "observability": {
+    // Off by default: this site's whole pitch is that it doesn't watch you.
+    // Turn it on temporarily if you ever need to debug a deploy.
+    "enabled": false
+  }
+}

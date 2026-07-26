@@ -1,0 +1,26 @@
+# Files in this repo that are NOT part of the published site.
+#
+# The Worker's assets directory is the repo root (there's no build step, so
+# there's no dist/ folder to point at). Wrangler reads this file — same syntax
+# as .gitignore — and skips anything matched here when uploading.
+#
+# If you add a new top-level file that's for developers rather than visitors,
+# add it here too.
+
+# Version control and tooling
+.git
+.github
+.gitignore
+.idea
+node_modules
+.assetsignore
+
+# Project docs and config — for people reading the repo, not the site
+README.md
+CLAUDE.md
+DEPLOYING.md
+CONTRIBUTING.md
+package.json
+package-lock.json
+wrangler.jsonc
+scripts

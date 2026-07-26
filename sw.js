@@ -14,7 +14,7 @@
  *
  * Bump CACHE whenever shipping changes so old caches are cleared on activate.
  */
-const CACHE = "1khz-v2";
+const CACHE = "1khz-v3";
 
 const PRECACHE = [
   "/",
@@ -23,6 +23,8 @@ const PRECACHE = [
   "/rt60/",
   "/note/",
   "/spl/",
+  "/math/",
+  "/about/",
   "/404.html",
   "/manifest.webmanifest",
   "/assets/icon.svg",

@@ -1,23 +1,27 @@
-name: Deploy (Cloudflare Pages)
+name: Deploy (Cloudflare Workers)
 
-# Publishes the site to Cloudflare Pages on every push to master.
+# Publishes the site to Cloudflare Workers on every push to master.
 #
-# Why Cloudflare Pages: it serves the same files for *.1khz.sh, which is what
-# keeps the subdomain gimmick (440.1khz.sh, 60.1khz.sh, …) working, and it
-# issues the wildcard TLS cert automatically. GitHub Pages can't do wildcard
-# subdomains, so the trick would break there.
+# Why Workers rather than Pages or GitHub Pages: the entire premise of this
+# site is that any subdomain is a frequency (440.1khz.sh, 60.1khz.sh, …), which
+# needs a host that serves the same files for *.1khz.sh.
+#   - GitHub Pages does not support wildcard custom domains at all.
+#   - Cloudflare Pages does not support wildcard custom domains either.
+#   - Cloudflare Worker *routes* do, and Cloudflare's free Universal SSL
+#     certificate already covers first-level wildcards like *.1khz.sh.
+#
+# There is no Worker script here — wrangler.jsonc declares static assets only,
+# so this uploads a directory and attaches the two routes. Full setup, DNS
+# records included, is in DEPLOYING.md.
 #
 # ── One-time setup ────────────────────────────────────────────────────────────
-#   1. Create a Pages project in the Cloudflare dashboard (or it is created on
-#      first deploy) named to match PROJECT below.
-#   2. Add two repository secrets (Settings → Secrets and variables → Actions):
-#         CLOUDFLARE_API_TOKEN   — a token with the "Cloudflare Pages: Edit" perm
-#         CLOUDFLARE_ACCOUNT_ID  — your account id (Cloudflare dashboard sidebar)
-#   3. Point the apex + a wildcard record at the Pages project and attach
-#      1khz.sh (and *.1khz.sh) as custom domains.
+#   Add two repository secrets (Settings → Secrets and variables → Actions):
+#     CLOUDFLARE_API_TOKEN   — created from the "Edit Cloudflare Workers"
+#                              template, scoped to the 1khz.sh zone
+#     CLOUDFLARE_ACCOUNT_ID  — Cloudflare dashboard sidebar
 #
-# Until the secrets exist this workflow runs but skips the publish step, so it
-# never fails a fork or a fresh clone.
+# Until those secrets exist this workflow runs but skips the publish step, so a
+# fork or a fresh clone never fails.
 
 on:
   push:
@@ -25,11 +29,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-pages
+  group: deploy-worker
   cancel-in-progress: true
 
-env:
-  PROJECT: 1khz-sh   # change to match your Cloudflare Pages project name
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -41,18 +45,44 @@ jobs:
         id: gate
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "$CF_TOKEN" ]; then
-            echo "Cloudflare secrets not set — skipping publish (add them to enable deploys)."
+          if [ -z "$CF_TOKEN" ] || [ -z "$CF_ACCOUNT" ]; then
+            echo "Cloudflare secrets not set — skipping publish."
+            echo "Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to enable deploys."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Workers
         if: steps.gate.outputs.ready == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=${{ env.PROJECT }} --branch=master --commit-dirty=true
+          command: deploy
+
+      - name: Smoke-test the deployment
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          # Give the edge a moment to pick up the new version.
+          sleep 10
+          fail=0
+          for url in \
+            "https://1khz.sh/" \
+            "https://1khz.sh/delay/" \
+            "https://1khz.sh/math/" \
+            "https://1khz.sh/about/" \
+            "https://440.1khz.sh/" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "ok   $code  $url"
+            else
+              echo "::error::$url returned $code"
+              fail=1
+            fi
+          done
+          # The wildcard check is the one that matters — it proves the route
+          # that makes the whole subdomain trick work is still attached.
+          exit $fail

@@ -1,10 +1,14 @@
 name: CI
 
 # Fast sanity checks on every push and PR. No build step — this is a static
-# site — so we just make sure nothing is broken or leaking third-party requests.
+# site — so instead of compiling, we check the things that have no other
+# safety net: syntax, structure, and the no-third-party-requests promise.
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -18,7 +22,7 @@ jobs:
 
       - name: Syntax-check every JS module
         run: |
-          for f in $(git ls-files '*.js'); do
+          for f in $(git ls-files '*.js' '*.mjs'); do
             echo "checking $f"
             node --check "$f"
           done
@@ -28,13 +32,38 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest ok')"
           node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json ok')"
 
+      - name: Structural checks (pages, offline cache, links, placeholders)
+        run: npm test
+
       - name: Guard against third-party requests (no tracking, no CDN fonts)
         run: |
-          if git grep -nE 'fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager|gtag\(' -- '*.html' '*.css' '*.js'; then
+          if git grep -nE 'fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager|gtag\(|cdn\.jsdelivr|unpkg\.com|cdnjs\.' -- '*.html' '*.css' '*.js'; then
             echo "::error::Found a third-party request above — the kit must stay request-free."
             exit 1
           fi
           echo "clean: no third-party requests"
+
+      - name: Guard against tracking and storage APIs
+        run: |
+          # The privacy claims on /about/ are specific ("no cookies, no local
+          # storage, no beacons"). Keep them true.
+          #
+          # Scoped to *.js because /about/ names these APIs in prose in order to
+          # promise it doesn't use them. That's safe only while every script is
+          # external, which the next step enforces.
+          if git grep -nE 'localStorage|sessionStorage|indexedDB|document\.cookie|navigator\.sendBeacon' -- '*.js'; then
+            echo "::error::Storage or beacon API found — /about/ promises none are used."
+            exit 1
+          fi
+          echo "clean: no cookies, storage, or beacons"
+
+      - name: No inline scripts (keeps the check above honest, and the CSP tight)
+        run: |
+          if git grep -nP '<script(?![^>]*\bsrc=)' -- '*.html'; then
+            echo "::error::Inline <script> found — all JS must live in /assets/js/."
+            exit 1
+          fi
+          echo "clean: every script is an external module"
 
       - name: Check every referenced font file exists
         run: |
@@ -43,3 +72,13 @@ jobs:
             if [ ! -f ".$f" ]; then echo "::error::missing font $f"; missing=1; fi
           done
           [ "$missing" = 0 ] && echo "all referenced fonts present"
+
+      - name: Check the deploy config still covers the wildcard
+        run: |
+          # The subdomain trick is the whole point — if this route ever gets
+          # dropped, every *.1khz.sh URL breaks and nothing else would notice.
+          if ! grep -q '\*\.1khz\.sh/\*' wrangler.jsonc; then
+            echo "::error::wrangler.jsonc has no *.1khz.sh/* route — the subdomain trick would break."
+            exit 1
+          fi
+          echo "wildcard route present"

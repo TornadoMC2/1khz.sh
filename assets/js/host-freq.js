@@ -11,8 +11,8 @@
  * Everything happens client-side from window.location.hostname. Wildcard DNS
  * just has to point *.1khz.sh at the same static files; no server logic.
  *
- * A `?f=` query parameter does the same job and wins over the hostname —
- * that's what the 2khz.sh redirect uses, and it makes localhost testing easy:
+ * A `?f=` query parameter does the same job and wins over the hostname, which
+ * is what makes localhost testing possible at all:
  *   http://localhost:8000/?f=440
  */
 
@@ -62,23 +62,6 @@ export function parseQueryFrequency(search = window.location.search) {
  */
 export function getTunedFrequency() {
   return parseQueryFrequency() ?? parseHostFrequency();
-}
-
-/**
- * Sibling domains redirect home with the frequency they imply.
- * 2khz.sh (and anything.2khz.sh) lands on 1khz.sh preset to 2 kHz.
- * Call once, early, on every page.
- */
-export function redirectSiblingDomains() {
-  const host = window.location.hostname;
-  if (host === "2khz.sh" || host.endsWith(".2khz.sh")) {
-    const url = new URL(window.location.href);
-    url.hostname = "1khz.sh";
-    url.searchParams.set("f", "2000");
-    window.location.replace(url.toString());
-    return true;
-  }
-  return false;
 }
 
 /** "440 Hz", "2.5 kHz" — for chips and labels, not precision readouts. */

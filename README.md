@@ -1,178 +1,143 @@
 # 1kHz.sh — Audio Field Kit
 
-A browser-based signal generator and a small suite of calculators for live
-sound and studio work. Fully static, fully client-side: no backend, no
-accounts, no ads, no tracking, nothing to install. Built to load fast on venue
-Wi-Fi and work on a phone at load-in — and it installs as an offline PWA, so
-once it's loaded it runs with no signal at all.
+**[1khz.sh](https://1khz.sh)** — a signal generator and a set of audio
+calculators that load instantly on a phone, work with no signal, and don't
+collect anything.
 
-Free and open source under the [MIT license](LICENSE). No third-party requests
-of any kind: even the fonts are self-hosted, so nothing about a visitor ever
-leaves their browser.
+Built for the work that happens standing up: load-in, soundcheck, ringing out a
+room, settling an argument about a delay tower. No accounts, no ads, no
+tracking, nothing to install, free forever, [MIT licensed](LICENSE).
+
+```
+440.1khz.sh   →   opens tuned to A440
+```
+
+---
 
 ## The trick
 
-**Any subdomain is a frequency.**
+**Any subdomain is a frequency.** Type it into the address bar and the
+generator opens on that note, ready to go.
 
-| URL | Result |
+| Type this | You get |
 | --- | --- |
-| `440.1khz.sh` | generator opens tuned to A440 |
-| `60.1khz.sh` | 60 Hz — mains hum |
-| `16k.1khz.sh` | 16 kHz (`k` / `khz` suffixes work) |
-| `432-5.1khz.sh` | 432.5 Hz (dash = decimal point, since DNS labels can't contain dots) |
-| `2khz.sh` | sibling domain, redirects to `1khz.sh/?f=2000` |
+| [`440.1khz.sh`](https://440.1khz.sh) | 440 Hz — concert A |
+| [`60.1khz.sh`](https://60.1khz.sh) | 60 Hz — mains hum, for hunting ground loops |
+| [`1k.1khz.sh`](https://1k.1khz.sh) | 1 kHz — the reference tone |
+| [`16k.1khz.sh`](https://16k.1khz.sh) | 16 kHz — a hearing test you'll wish you hadn't run |
+| [`432-5.1khz.sh`](https://432-5.1khz.sh) | 432.5 Hz — a dash stands in for the decimal point, since DNS labels can't contain dots |
 
-There's no server logic behind it. A wildcard DNS record points every
-subdomain at the same static files; `assets/js/host-freq.js` reads
-`window.location.hostname`, parses the leftmost label, and presets the dial.
-A `?f=` query parameter does the same thing (and wins over the hostname),
-which is what the sibling-domain redirect uses and what makes local testing
-easy: `http://localhost:8000/?f=440`.
+No server is involved. Every subdomain serves the same static files, and a few
+lines of JavaScript read the hostname and set the dial. `?f=440` does the same
+thing if you'd rather not retype a domain.
 
-## Modules
+## What's in the kit
 
-| Path | Module | Does |
+| Module | What it does | When you'd reach for it |
 | --- | --- | --- |
-| `/` | **1K-GEN** | Signal generator with the signals grouped into **Tones** (sine, triangle, square, saw), **Noise** (white, pink, brown, blue), and **Moving** (sweep ↑, sweep ↓, warble, pulse). Log frequency dial with presets and typed entry, L / L+R / R routing, dBFS level fader (defaults to −18), live oscilloscope, note + wavelength + period readouts. Space bar toggles output; output always starts off. |
-| `/delay/` | **1K-DLY** | Distance ↔ milliseconds with temperature-corrected speed of sound, plus samples at 44.1/48/96/192 kHz. |
-| `/db/` | **1K-LVL** | dBu ↔ dBV ↔ dBFS ↔ volts, with a converter-alignment setting (0 dBFS = +24/+18/… dBu) and headroom readouts. |
-| `/rt60/` | **1K-RT60** | Sabine RT60 estimate from room dimensions and average absorption, Schroeder frequency, and the room-mode table (axial / tangential / oblique) below 300 Hz. |
-| `/note/` | **1K-NOTE** | Note ↔ frequency ↔ wavelength ↔ MIDI, with adjustable A4 reference and cents offset. Links back to the generator to hear the result. |
-| `/spl/` | **1K-SPL** | Loudspeaker SPL at distance, amplifier power for a target SPL with headroom, and speaker-cable voltage drop by AWG. |
+| **[Signal Generator](https://1khz.sh/)** | Sine, triangle, square, saw; white / pink / brown / blue noise; sweeps, warble, and pulse. Log frequency dial, L / L+R / R routing, level fader, live oscilloscope. | Ringing out a room, checking a channel, finding which box is which, proving the desk isn't lying to you. |
+| **[Delay Time](https://1khz.sh/delay/)** | Distance ↔ milliseconds, corrected for air temperature, plus the sample count at 44.1 / 48 / 96 / 192 kHz. | Time-aligning fills and delay towers. The temperature correction is why the ring that was right at load-in is smeared at doors. |
+| **[Level Converter](https://1khz.sh/db/)** | dBu ↔ dBV ↔ dBFS ↔ volts, with converter alignment and headroom. | Working out why the +4 dBu source and the −10 dBV one are 11.8 dB apart, and where your converter actually clips. |
+| **[Room Acoustics](https://1khz.sh/rt60/)** | RT60 estimate, Schroeder frequency, and the full room-mode table below 300 Hz. | Sizing up an unfamiliar room, or working out which low-end problem is the room's fault rather than yours. |
+| **[Note ↔ Frequency](https://1khz.sh/note/)** | Pitch, frequency, wavelength, MIDI number, cents, adjustable A4. | Tuning to something that isn't A440, or turning "that ringing note" into a number you can notch. |
+| **[SPL & Power](https://1khz.sh/spl/)** | SPL at distance, amplifier power for a target with headroom, and speaker-cable voltage drop by AWG. | Answering "will this rig make it to the back wall" before you load it into the truck. |
 
-## Stack
+## It works with no signal
 
-- Plain HTML + one shared stylesheet (`assets/css/panel.css`) + vanilla ES
-  modules. No framework, no build step, no dependencies.
-- Web Audio API for all signal generation. Tones are native `OscillatorNode`
-  types; noise is generated into looping buffers (pink is a Paul Kellet filter,
-  brown a leaky integral of white, blue the first difference of pink, all RMS-
-  matched); sweeps are chained exponential ramps; warble is an LFO on the tone's
-  frequency; pulse is a square-LFO gate. The scope is an `AnalyserNode` into a
-  canvas with a rising-edge trigger so periodic waves hold still.
-- Audio only ever starts from a user gesture, and the output gain ramps over
-  ~10 ms so the power switch never clicks.
-- Two self-hosted webfonts (Barlow Semi Condensed for panel labels, IBM Plex
-  Mono for readouts). Only the latin subset of each weight is vendored as
-  `woff2` in `assets/fonts/` (~110 KB total), served same-origin with
-  `font-display: swap` and preloaded. **No Google Fonts, no `gstatic`
-  request** — regenerate the files with `npm run fonts` if you change weights.
-- Everything else is CSS. No JavaScript is loaded from anywhere but this
-  origin, and there are no analytics, cookies, or storage.
+Venue Wi-Fi is a rumour and basements have no bars, so the whole kit installs
+as an app and runs completely offline once it has loaded a single time.
 
-## Progressive Web App / offline
+- **On a phone:** open [1khz.sh](https://1khz.sh) and use *Add to Home Screen*.
+- **On a desktop:** look for the install icon in the address bar.
 
-The site is installable and works offline:
+After that it opens instantly and works in airplane mode, in a loading dock, in
+a room with three feet of concrete over it.
 
-- `manifest.webmanifest` makes it installable (standalone display, maskable
-  icon, app shortcuts to A440 and each module).
-- `sw.js` is a service worker that precaches the whole kit — every page, the
-  stylesheet, every module, the fonts — and serves it stale-while-revalidate:
-  instant on repeat visits, still self-updating on the next load, and fully
-  functional with no network (airplane mode, a basement, dead venue Wi-Fi).
-- It registers only over HTTPS, so `http://localhost` dev is unaffected.
-- Bump the `CACHE` constant at the top of `sw.js` when you ship changes so old
-  caches are cleared on activate.
+## Privacy, plainly
 
-## Local development
+There is no backend. Nothing you type is sent anywhere, because there is
+nowhere for it to go. No analytics, no cookies, no local storage, no
+third-party requests of any kind — even the fonts are served from this domain
+so that loading a page doesn't tell Google you did.
 
-ES modules need a real origin, so serve the folder instead of opening files:
+You don't have to take that on faith. Open your browser's dev tools, watch the
+Network tab, and use every calculator on the site: nothing fires. Or just turn
+off your network and watch it keep working.
+
+**[The full version, including what the host can see anyway →](https://1khz.sh/about/)**
+
+## The maths
+
+Every formula is standard, and every one of them assumes something a real room
+will cheerfully violate. Sabine assumes a diffuse field; the SPL maths assumes
+free field and a point source; the delay maths assumes still air at a uniform
+temperature.
+
+So the numbers here are **planning estimates, not measurements** — they tell
+you what to expect, not what your system is doing.
+
+Every equation, constant, and assumption is written out, along with the point
+where each one stops being trustworthy:
+
+**[Formulas & Assumptions →](https://1khz.sh/math/)**
+
+Found an error in the maths? That's the most useful bug report this project can
+get — please [open an issue](https://github.com/TornadoMC2/1khz.sh/issues).
+
+## Safety
+
+A tone generator into a real system can hurt your ears and kill drivers faster
+than music can, because it never stops and never dips. Output always starts
+off, and the level starts at −18 dBFS, deliberately. Bring gain up from the
+system rather than from the page, keep sustained high frequencies short, and
+know where the output is patched before you switch it on.
+
+---
+
+## Running your own copy
+
+No build step, no bundler, no dependencies — it's HTML, one stylesheet, and a
+handful of ES modules. Clone it and serve the folder:
 
 ```sh
+git clone https://github.com/TornadoMC2/1khz.sh
+cd 1khz.sh
 npm start          # python3 -m http.server 8000
-# then http://localhost:8000/?f=440
 ```
 
-The service worker stays dormant on `http://localhost` (it needs HTTPS), so
-you always see fresh files while developing.
+Then open <http://localhost:8000/?f=440>. Use `?f=` while developing —
+localhost can't carry a wildcard subdomain, and the query parameter takes
+priority over the hostname anyway.
 
-## Deploying
+ES modules need a real origin, so opening the `.html` files directly won't
+work. The service worker stays dormant on `http://localhost`, so you always see
+fresh files.
 
-The site is static files at a domain root — any static host works for
-`1khz.sh` itself. The wildcard-subdomain trick needs a host that will serve
-the same files for `*.1khz.sh`, which narrows the options:
+Hosting it somewhere public — including the wildcard-subdomain setup, which
+narrows the field considerably — is covered in **[DEPLOYING.md](DEPLOYING.md)**.
 
-1. **DNS:** create two records — `@` (apex) and `*` (wildcard) — pointing at
-   your host. With Cloudflare DNS this is an apex record plus a wildcard
-   `CNAME`/`A` to the same target.
-2. **Host:** the host has to accept any `Host:` header under the domain.
-   - **Cloudflare** (Pages/Workers with static assets): attach the apex as a
-     custom domain, then route `*.1khz.sh/*` to the same deployment. Check
-     current wildcard custom-domain support for your plan — this has changed
-     over time.
-   - **Your own box / VPS:** trivial — `server_name 1khz.sh *.1khz.sh;` in
-     nginx and a wildcard (or wildcard-SAN) TLS certificate.
-   - **GitHub Pages:** hosts the site fine at the apex, but does **not**
-     support wildcard subdomains on custom domains, so the trick won't work
-     there alone. Fronting it with a proxy that normalizes the Host header
-     works.
-3. **TLS:** the certificate must cover `*.1khz.sh`. Cloudflare issues this
-   automatically; on your own box, ask certbot/ACME for a wildcard cert via
-   DNS validation.
-4. **Sibling domain:** point `2khz.sh` (and `*.2khz.sh`) anywhere that serves
-   these same files — `host-freq.js` client-side redirects it to
-   `1khz.sh/?f=2000`. A host-level 301 to that URL is even better; the JS is
-   the fallback.
+## Contributing
 
-No cache headers are required, but everything here is immutable-friendly if
-you want to set long TTLs on `/assets/`.
+Bug reports, corrections to the maths, and new modules are all welcome.
 
-### Continuous deployment (GitHub Actions)
+A few conventions worth keeping:
 
-Two workflows ship in `.github/workflows/`:
+- **Formulas live in `assets/js/audio-math.js`** as pure functions. Page
+  scripts do DOM and state; they don't do arithmetic.
+- **New maths gets documented on `/math/`** — the formula, its constants, and
+  honestly what it assumes. A calculator that doesn't say what it assumes is
+  worse than no calculator.
+- **No dependencies, no build step.** Everything must run as-authored in a
+  browser.
+- **No third-party requests, ever.** CI fails the build if one appears.
 
-- **`ci.yml`** — runs on every push and PR: syntax-checks every JS module,
-  validates the manifest / `package.json`, and fails if a third-party request
-  (Google Fonts, analytics) ever sneaks back in. No secrets needed.
-- **`deploy.yml`** — publishes to **Cloudflare Pages** on push to `master`
-  (Cloudflare because it's the option that keeps `*.1khz.sh` working). Add two
-  repository secrets to turn it on:
-  - `CLOUDFLARE_API_TOKEN` — a token with *Cloudflare Pages: Edit*
-  - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard sidebar
+The bar for a new module is simply that it be worth pulling out a phone for
+while a room full of people waits.
 
-  and set `PROJECT` in the workflow to your Pages project name. Until the
-  secrets exist the workflow runs but skips the publish step, so it never fails
-  a fork. Prefer another host? Delete `deploy.yml` and deploy however you like —
-  `ci.yml` stays useful regardless.
+## Licence
 
-## Project links (source + donations)
+[MIT](LICENSE) — use it, fork it, ship it inside something else.
 
-Both live in one file, [`assets/js/config.js`](assets/js/config.js):
-
-```js
-export const SITE = {
-  sourceUrl: "https://github.com/YOUR-USER/1khz.sh", // your repo
-  donateUrl: "https://ko-fi.com/YOUR-HANDLE",        // any URL, or "" to hide
-  donateLabel: "Support on Ko-fi",
-};
-```
-
-Edit those two URLs once and the footer of every page updates. Set a value to
-`""` to drop that link entirely. The links ship as placeholders — swap in your
-real GitHub repo and Ko-fi (or Buy Me a Coffee / GitHub Sponsors) before going
-live.
-
-## Monetization posture
-
-None, basically. No ads, no analytics, no tracking. The only ask is the
-optional donation link above. Two clearly marked dormant affiliate slots
-(`AFFILIATE SLOT` comments on `/rt60/` and `/spl/`) ship styled but
-`display:none` — fill them in, remove the class, and disclose, or leave them
-off forever.
-
-## License
-
-[MIT](LICENSE) — use it, fork it, ship it. The bundled fonts are OFL-licensed
-(Barlow Semi Condensed, IBM Plex Mono); see the notice at the bottom of the
-LICENSE file.
-
-## Accuracy notes
-
-- Speed of sound: `c = 331.3 + 0.606·T°C`; wavelength readouts assume 20 °C.
-- Levels: 0 dBu = 0.7746 V; dBFS conversions are relative to the selected
-  converter alignment.
-- RT60 is Sabine with a single average absorption coefficient — a planning
-  estimate, not a measurement.
-- SPL math is free-field, single source, on axis: real rooms and arrays will
-  read higher.
-- Cable resistance is solid copper at 20 °C.
+The two bundled webfonts are third-party and separately licensed: Barlow Semi
+Condensed and IBM Plex Mono, both under the SIL Open Font License 1.1. See the
+notice at the bottom of [LICENSE](LICENSE).

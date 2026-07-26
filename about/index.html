@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>About &amp; Privacy — 1kHz.sh</title>
+  <meta name="description" content="What this site is, who made it, exactly what it does and does not collect, and how to verify every one of those claims for yourself in about a minute.">
+  <link rel="canonical" href="https://1khz.sh/about/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:title" content="About &amp; Privacy — 1kHz.sh">
+  <meta property="og:description" content="What this site is, who made it, exactly what it does and does not collect, and how to verify every one of those claims for yourself in about a minute.">
+  <meta property="og:url" content="https://1khz.sh/about/">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/panel.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0a0b0d">
+  <link rel="apple-touch-icon" href="/assets/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+</head>
+<body data-page="about">
+
+  <header class="rack-head">
+    <a class="brand" href="/">
+      <span class="brand-mark">1k<b>Hz</b>.sh</span>
+      <span class="brand-sub">Audio Field Kit</span>
+    </a>
+    <nav class="rack-nav" aria-label="Modules">
+      <a href="/" data-nav="gen">Gen</a>
+      <a href="/delay/" data-nav="delay">Delay</a>
+      <a href="/db/" data-nav="db">Level</a>
+      <a href="/rt60/" data-nav="rt60">RT60</a>
+      <a href="/note/" data-nav="note">Note</a>
+      <a href="/spl/" data-nav="spl">SPL</a>
+      <span class="nav-rule" aria-hidden="true"></span>
+      <a href="/math/" data-nav="math">Math</a>
+      <a href="/about/" data-nav="about">About</a>
+    </nav>
+    <a class="tuned-chip" id="tunedChip" href="/" hidden></a>
+  </header>
+
+  <main class="rack">
+
+    <!-- ============================ WHAT ================================= -->
+    <section class="unit prose" aria-labelledby="aboutTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h1 class="plate-name" id="aboutTitle">About This Site</h1>
+        <span class="plate-model">1K-INFO &middot; the honest version</span>
+      </div>
+      <p>
+        1kHz.sh is a signal generator and a handful of audio calculators, built for
+        the kind of work that happens standing up: load-in, soundcheck, ringing out a
+        room, arguing about a delay tower. It is meant to be the thing you can pull up
+        on a phone with one bar of venue Wi-Fi and trust the answer from.
+      </p>
+      <p>
+        It is free, it has no accounts, it shows no ads, and it collects nothing. That
+        is easy to write on a webpage and worth nothing unless you can check it, so
+        the rest of this page is mostly about how to check it.
+      </p>
+      <p>
+        It is built and maintained by one person &mdash; Hunter Johanson
+        (<a href="https://github.com/TornadoMC2" rel="noopener noreferrer" target="_blank">@TornadoMC2</a>)
+        &mdash; as an open-source project under the MIT licence. Every line of it is
+        on <a href="https://github.com/TornadoMC2/1khz.sh" rel="noopener noreferrer" target="_blank">GitHub</a>.
+        The plan is to keep adding tools that are genuinely useful on a gig, and to
+        keep the whole thing loading in well under a second.
+      </p>
+    </section>
+
+    <!-- =========================== PRIVACY =============================== -->
+    <section class="unit prose" aria-labelledby="privTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="privTitle">Privacy</h2>
+        <span class="plate-model">specific claims, not a policy</span>
+      </div>
+      <p>
+        There is no backend. Nothing you type into any field on this site is
+        transmitted anywhere &mdash; not to me, not to anyone. Every calculation runs
+        as JavaScript inside your own browser, on your own device.
+      </p>
+
+      <h3>What this site does not do</h3>
+      <ul>
+        <li><strong>No analytics.</strong> No Google Analytics, no Plausible, no
+          Fathom, no self-hosted counter, no pixel, no beacon.</li>
+        <li><strong>No cookies.</strong> Not one, of any kind, including "essential"
+          ones. There is nothing to consent to, which is why there is no banner.</li>
+        <li><strong>No local storage.</strong> Nothing is written to
+          <code>localStorage</code>, <code>sessionStorage</code>, or IndexedDB. Close
+          the tab and no trace of your session remains.</li>
+        <li><strong>No third-party requests.</strong> Zero. The fonts are served from
+          this domain rather than Google Fonts specifically so that loading a page here
+          does not tell Google you did. There are no CDNs, no embeds, no iframes.</li>
+        <li><strong>No accounts, no email, no sign-up.</strong> There is nothing to
+          register for.</li>
+        <li><strong>No ads, and no affiliate links.</strong> Nothing on this site is
+          placed because someone paid for it.</li>
+      </ul>
+
+      <h3>What is unavoidably visible</h3>
+      <p>
+        Being honest about this matters more than the list above. Static files still
+        have to be served by a web server, and web servers see requests:
+      </p>
+      <ul>
+        <li>The site is hosted on <strong>Cloudflare</strong>, which necessarily
+          receives your IP address, user agent, and the URL you asked for in order to
+          send the page back. That is how HTTP works, and it applies to every website
+          you have ever visited.</li>
+        <li>Because the frequency lives in the hostname, <strong>the subdomain you
+          visit is part of that request</strong> &mdash; loading
+          <code>440.1khz.sh</code> means "440" appears in the URL, whereas typing 440
+          into the dial once you are here does not.</li>
+        <li>I do not run analytics on top of that data, and I do not have any interest
+          in it. But I would rather tell you the mechanism than claim a kind of
+          invisibility that no hosted website can honestly offer.</li>
+      </ul>
+      <p>
+        If even that bothers you: install it as an app or load it once and turn off
+        your network. It works completely offline, at which point nothing leaves your
+        device at all. That is not a workaround &mdash; it is the intended way to use
+        it at a gig.
+      </p>
+    </section>
+
+    <!-- ============================ VERIFY =============================== -->
+    <section class="unit prose" aria-labelledby="verifyTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="verifyTitle">Don't Take My Word For It</h2>
+        <span class="plate-model">four checks, about a minute</span>
+      </div>
+      <p>
+        Every claim on this page is verifiable from the browser you are reading it in.
+        You do not need to trust me, and you shouldn't have to.
+      </p>
+      <ol>
+        <li>
+          <strong>Watch the network.</strong> Open your browser's developer tools
+          (<kbd>F12</kbd>, or Cmd&#8209;Option&#8209;I on a Mac), go to the
+          <em>Network</em> tab, and reload. You will see this page, one stylesheet, a
+          couple of scripts, and the fonts &mdash; all from <code>1khz.sh</code>. Now go
+          use the calculators. Type in every field, drag every fader, run the generator.
+          <strong>Nothing new appears.</strong> There is nowhere for your data to go.
+        </li>
+        <li>
+          <strong>Pull the plug.</strong> Load any page here, then switch on airplane
+          mode and reload it. It still works, because the service worker cached the
+          whole kit on your device. A site that keeps functioning with no network is a
+          site that was not phoning home.
+        </li>
+        <li>
+          <strong>Check the jar.</strong> In developer tools, open
+          <em>Application</em> (or <em>Storage</em>). Cookies: empty. Local storage:
+          empty. The only thing there is the offline cache, which holds the site's own
+          files and nothing about you.
+        </li>
+        <li>
+          <strong>Read it.</strong> There is no build step and no bundler, so the
+          JavaScript running in your browser is exactly the JavaScript in the
+          repository &mdash; not minified, not transpiled, not obfuscated. View source
+          on this page, or read
+          <a href="https://github.com/TornadoMC2/1khz.sh" rel="noopener noreferrer" target="_blank">the whole project on GitHub</a>.
+          It is a few hundred lines. The maths is all in one file.
+        </li>
+      </ol>
+      <p class="footnote">
+        That last point is the one that does the real work. Plenty of sites promise
+        privacy; not many ship source you can read in a sitting and then compare
+        against what your browser actually loaded.
+      </p>
+    </section>
+
+    <!-- ============================ SAFETY =============================== -->
+    <section class="unit prose" aria-labelledby="safetyTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="safetyTitle">Using It Safely</h2>
+        <span class="plate-model">tones into a PA are not a toy</span>
+      </div>
+      <p>
+        A signal generator plugged into a real system can hurt your ears and kill
+        drivers faster than music can, because it never stops and it never dips.
+        Sustained tones carry far more energy than programme material at the same meter
+        reading.
+      </p>
+      <ul>
+        <li><strong>Output always starts off, and the level starts at
+          &minus;18 dBFS.</strong> That is deliberate. Bring gain up from the system,
+          not from this page.</li>
+        <li><strong>High frequencies kill compression drivers.</strong> Continuous tones
+          and full-range noise above a few kHz will cook a horn at levels that feel
+          moderate. Keep it short, keep it low.</li>
+        <li><strong>Protect your hearing first.</strong> Sustained pure tones are
+          genuinely more damaging than they sound, and they mask their own loudness.
+          If you are checking something at level, wear protection and keep it brief.</li>
+        <li><strong>Check the patch before the power.</strong> Know where the output is
+          going before you switch it on. Headphones on a desk are a classic way to
+          discover the level was wrong.</li>
+        <li><strong>The 16 kHz "hearing test" is not a hearing test.</strong> Most phone
+          and laptop speakers cannot reproduce it at all. If you hear nothing, the
+          likeliest explanation is the speaker, not your ears. See an audiologist for
+          the real answer.</li>
+      </ul>
+    </section>
+
+    <!-- =========================== ACCURACY ============================== -->
+    <section class="unit prose" aria-labelledby="accTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="accTitle">Accuracy</h2>
+        <span class="plate-model">what these numbers are worth</span>
+      </div>
+      <p>
+        The formulas are standard and implemented carefully, but every one of them
+        rests on assumptions that a real room will cheerfully violate. Sabine assumes a
+        diffuse field; the SPL maths assumes free field and a point source; the delay
+        maths assumes still air at a uniform temperature. None of those are true at a
+        gig.
+      </p>
+      <p>
+        So: <strong>these are planning numbers, not measurements.</strong> They will
+        tell you what to expect and what size of answer is reasonable. They will not
+        tell you what your system is actually doing &mdash; only a measurement
+        microphone does that.
+      </p>
+      <p>
+        Every formula, constant, and assumption is written out in full on the
+        <a href="/math/">Formulas &amp; Assumptions</a> page, including the places where
+        each one stops being trustworthy. If you find an error, please
+        <a href="https://github.com/TornadoMC2/1khz.sh/issues" rel="noopener noreferrer" target="_blank">open an issue</a>
+        &mdash; corrections are the most useful contribution anyone can make here.
+      </p>
+      <p class="footnote">
+        The software is provided "as is", without warranty of any kind, as set out in
+        the MIT licence. You are responsible for your own system, your own ears, and
+        your own gig.
+      </p>
+    </section>
+
+    <!-- =========================== OPEN SOURCE =========================== -->
+    <section class="unit prose" aria-labelledby="osTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="osTitle">Open Source</h2>
+        <span class="plate-model">MIT &middot; take it and run</span>
+      </div>
+      <p>
+        The whole project is
+        <a href="https://github.com/TornadoMC2/1khz.sh" rel="noopener noreferrer" target="_blank">on GitHub</a>
+        under the MIT licence: use it, fork it, host your own copy, put it on a laptop
+        in a shop, ship it inside something else. No attribution theatre required
+        beyond keeping the licence file.
+      </p>
+      <p>
+        There is no framework, no bundler, and no dependencies &mdash; it is HTML, one
+        stylesheet, and a handful of ES modules. You can clone it and serve the folder
+        and it just runs. The two bundled webfonts (Barlow Semi Condensed and IBM Plex
+        Mono) are third-party and separately licensed under the SIL Open Font License.
+      </p>
+
+      <h3>How it stays free</h3>
+      <p>
+        It costs almost nothing to run: static files on a free hosting tier, and a
+        domain. There is no business model, no investor, and nothing to upsell. If a
+        donation link ever appears in the footer it will be optional and unobtrusive,
+        and if anything about this ever changes &mdash; sponsorship, affiliate links,
+        anything at all &mdash; it will be disclosed on this page rather than quietly
+        rolled out.
+      </p>
+
+      <h3>Install it</h3>
+      <p>
+        The site is a Progressive Web App. On a phone, use "Add to Home Screen"; on a
+        desktop browser, look for the install icon in the address bar. It then launches
+        like an app, opens instantly, and works with no signal at all &mdash; which is
+        the actual reason it exists in this form.
+      </p>
+    </section>
+
+    <!-- ============================ CONTACT ============================== -->
+    <section class="unit prose" aria-labelledby="contactTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="contactTitle">Get In Touch</h2>
+        <span class="plate-model">bugs, maths, requests</span>
+      </div>
+      <p>
+        Bug reports, corrections to the maths, and requests for tools you actually want
+        on a gig all belong on
+        <a href="https://github.com/TornadoMC2/1khz.sh/issues" rel="noopener noreferrer" target="_blank">the issue tracker</a>.
+        Pull requests are welcome too. The bar for a new module is simply that it be
+        something worth pulling out a phone for while a room full of people waits.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="rack-foot">
+    <hr class="foot-rule">
+    <p>
+      Every number on this page is worked out in your browser. No accounts, no
+      cookies, no analytics, no backend &mdash; nothing you type is sent anywhere,
+      and the kit keeps working with the network off. Free and open source under
+      the MIT licence.
+    </p>
+    <nav class="foot-links" aria-label="Project">
+      <!-- Source and donation links are set from /assets/js/config.js. -->
+      <a data-site="source" rel="noopener noreferrer" target="_blank" aria-label="Source code on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-label>Source on GitHub</span>
+      </a>
+      <a data-site="donate" class="foot-donate" rel="noopener noreferrer" target="_blank" aria-label="Support the project">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 14.25l-1.02-.93C3.4 10.07 1 7.9 1 5.25 1 3.42 2.42 2 4.25 2 5.28 2 6.27 2.48 8 4c1.73-1.52 2.72-2 3.75-2C13.58 2 15 3.42 15 5.25c0 2.65-2.4 4.82-5.98 8.07L8 14.25z"/></svg>
+        <span data-label>Support the project</span>
+      </a>
+      <a href="/about/">About &amp; privacy</a>
+      <a href="/math/">Formulas &amp; assumptions</a>
+    </nav>
+  </footer>
+
+  <script type="module" src="/assets/js/panel-common.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# 1kHz.sh — everything here is public, static, and free to crawl.
+#
+# Note for crawlers: every subdomain of 1khz.sh serves these same files by
+# design (the subdomain is read client-side as a frequency), so *.1khz.sh is
+# duplicate content. Each page carries a rel="canonical" pointing at the
+# apex, which is the address that should be indexed.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://1khz.sh/sitemap.xml
