@@ -9,10 +9,9 @@ export const SITE = {
   // Public source repository. Shown in the footer as "Source on GitHub".
   sourceUrl: "https://github.com/TornadoMC2/1khz.sh",
 
-  // Donation link. Empty = no donate button anywhere on the site.
-  // To turn it on, set the URL and a label, e.g.:
-  //   donateUrl: "https://ko-fi.com/your-handle",
-  //   donateLabel: "Support on Ko-fi",
-  donateUrl: "",
-  donateLabel: "Support the project",
+  // Donation link. Set to "" to remove the donate button everywhere.
+  // The label names the destination on purpose — people should know where a
+  // link goes before they tap it.
+  donateUrl: "https://ko-fi.com/hjohanson",
+  donateLabel: "Support on Ko-fi",
 };
