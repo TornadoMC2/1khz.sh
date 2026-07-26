@@ -35,6 +35,11 @@ const linkFor = (sel, url, label) => {
   if (label) {
     const span = a.querySelector("[data-label]");
     if (span) span.textContent = label;
+    // The markup carries a generic aria-label as a fallback for before this
+    // runs. Once there's a real label, keep the accessible name in step with
+    // the visible one — otherwise a screen reader announces something the
+    // page doesn't say, and never mentions where the link actually goes.
+    a.setAttribute("aria-label", label);
   }
 };
 linkFor('[data-site="source"]', SITE.sourceUrl);
