@@ -61,6 +61,11 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # wrangler-action@v3 installs wrangler 3.90.0 unless told otherwise,
+          # which predates assets-only Workers and fails with "Missing
+          # entry-point" — this project deliberately has no Worker script, just
+          # static files. Pin the major version that supports it.
+          wranglerVersion: "4"
           command: deploy
 
       - name: Smoke-test the deployment
