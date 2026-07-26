@@ -13,7 +13,9 @@
 .gitignore
 .idea
 node_modules
+.wrangler
 .assetsignore
+.DS_Store
 
 # Project docs and config — for people reading the repo, not the site
 README.md
