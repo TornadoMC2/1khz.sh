@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Note ↔ Frequency — 1kHz.sh</title>
-  <meta name="description" content="Note to frequency to wavelength converter with adjustable A4 reference, cents offset, and MIDI numbers.">
+  <title>Note to Frequency Calculator — Hz, MIDI, Cents — 1kHz.sh</title>
+  <meta name="description" content="Convert note to frequency and back, with wavelength, MIDI note number and cents offset. The A4 reference is adjustable, so A=432 and A=415 work as well as A=440.">
   <link rel="canonical" href="https://1khz.sh/note/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Note ↔ Frequency — 1kHz.sh">
-  <meta property="og:description" content="Note to frequency to wavelength converter with adjustable A4 reference, cents offset, and MIDI numbers.">
+  <meta property="og:description" content="Convert note to frequency and back, with wavelength, MIDI note number and cents offset. The A4 reference is adjustable, so A=432 and A=415 work as well as A=440.">
   <meta property="og:url" content="https://1khz.sh/note/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/note.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh note and frequency converter panel.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/note.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,67 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://1khz.sh/note/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "1kHz.sh",
+            "item": "https://1khz.sh/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Note & Frequency",
+            "item": "https://1khz.sh/note/"
+          }
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://1khz.sh/note/#app",
+        "url": "https://1khz.sh/note/",
+        "name": "Note ↔ Frequency",
+        "description": "Convert note to frequency and back, with wavelength, MIDI note number and cents offset. The A4 reference is adjustable, so A=432 and A=415 work as well as A=440.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Audio calculator",
+        "operatingSystem": "Any (runs in a web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "featureList": [
+          "Note name to frequency, and frequency to nearest note",
+          "Cents offset from equal temperament",
+          "MIDI note numbers",
+          "Wavelength in air",
+          "Adjustable A4 reference from 400 to 480 Hz",
+          "Works offline"
+        ],
+        "author": {
+          "@id": "https://1khz.sh/#author"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "image": "https://1khz.sh/assets/og/note.png"
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="note">
 
@@ -105,6 +173,62 @@
         <a href="#" id="playLink" class="footnote">Hear this on the generator &rarr;</a>
       </p>
     </section>
+    <!-- ============================= NOTES ================================ -->
+    <section class="unit prose" aria-labelledby="noteNotes">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="noteNotes">Pitch, Frequency, and MIDI</h2>
+        <span class="plate-model">equal temperament</span>
+      </div>
+
+      <h3>How the numbers relate</h3>
+      <p>
+        Twelve-tone equal temperament divides the octave into twelve equal ratios, so
+        one semitone up multiplies the frequency by the twelfth root of two &mdash;
+        about 1.0595. An octave doubles it. A cent is a hundredth of a semitone, which
+        works out to about 0.06% in frequency; most people notice a pitch error
+        somewhere around 5&ndash;10 cents on a sustained note, and rather less than
+        that on a unison.
+      </p>
+
+      <h3>The A4 reference</h3>
+      <p>
+        Everything is anchored to one number, and that number is a convention rather
+        than a law of nature. ISO&nbsp;16 fixes A4 at 440&nbsp;Hz, which is what
+        recording, film, and almost all popular music use. Plenty of European
+        orchestras tune to 442 or 443&nbsp;Hz for a brighter sound. Historically
+        informed baroque performance usually sits around 415&nbsp;Hz, close to a
+        semitone flat. And 432&nbsp;Hz has a devoted following on the internet built on
+        claims about resonance and wellbeing for which there is no evidence &mdash; it
+        is a fine thing to tune to if you like how it sounds, and nothing more than
+        that. The reference field takes anything from 400 to 480&nbsp;Hz.
+      </p>
+
+      <h3>MIDI note numbers</h3>
+      <p>
+        MIDI numbers the semitones from 0 to 127, with A4 at 69 and middle C at 60. The
+        catch is that the octave <em>name</em> for middle C is not universal: the MIDI
+        specification and most modern software call it C4, but Yamaha has historically
+        called it C3. If a sampler is mapping everything an octave off, this is almost
+        always why &mdash; the note number is unambiguous, the name is not.
+      </p>
+
+      <h3>Wavelength</h3>
+      <p>
+        The wavelength shown alongside each note is that frequency in air, and it is
+        the number that makes acoustics intuitive. A low E on a bass at 41&nbsp;Hz is
+        over eight metres long, which is why no amount of small-room treatment
+        controls it. A 10&nbsp;kHz sibilance problem is 34&nbsp;mm, which is why moving
+        a microphone an inch fixes it.
+      </p>
+      <p class="footnote">
+        The conversion, the cents formula, and the wavelength constant are on the
+        <a href="/math/#noteMathTitle">formulas page</a>. To hear any of these,
+        send the frequency to the <a href="/">generator</a>; for what those
+        wavelengths do in a room, see <a href="/rt60/">Room Acoustics</a>.
+      </p>
+    </section>
+
   </main>
 
   <footer class="rack-foot">

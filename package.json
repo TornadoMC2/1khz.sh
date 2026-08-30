@@ -16,6 +16,8 @@
     "serve": "python3 -m http.server 8000",
     "test": "node scripts/check-site.mjs",
     "deploy": "npx wrangler deploy",
-    "fonts": "bash scripts/fetch-fonts.sh"
+    "fonts": "bash scripts/fetch-fonts.sh",
+    "og": "node scripts/make-og.mjs",
+    "sitemap": "node scripts/make-sitemap.mjs"
   }
 }

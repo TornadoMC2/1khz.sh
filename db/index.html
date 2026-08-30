@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Level Converter — 1kHz.sh</title>
-  <meta name="description" content="dBu ↔ dBV ↔ dBFS ↔ volts converter with headroom math against your converter's alignment level.">
+  <title>dBu, dBV, dBFS &amp; Volts Converter — 1kHz.sh</title>
+  <meta name="description" content="Convert dBu, dBV, dBFS and volts in one place, with headroom worked out against your converter's alignment level — +18 dBu EBU, +24 dBu AES, or your own.">
   <link rel="canonical" href="https://1khz.sh/db/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
-  <meta property="og:title" content="Level Converter — 1kHz.sh">
-  <meta property="og:description" content="dBu ↔ dBV ↔ dBFS ↔ volts converter with headroom math against your converter's alignment level.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Level Converter — dBu, dBV, dBFS — 1kHz.sh">
+  <meta property="og:description" content="Convert dBu, dBV, dBFS and volts in one place, with headroom worked out against your converter's alignment level — +18 dBu EBU, +24 dBu AES, or your own.">
   <meta property="og:url" content="https://1khz.sh/db/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/db.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh level converter panel.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/db.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,65 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://1khz.sh/db/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "1kHz.sh",
+            "item": "https://1khz.sh/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Level Converter",
+            "item": "https://1khz.sh/db/"
+          }
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://1khz.sh/db/#app",
+        "url": "https://1khz.sh/db/",
+        "name": "Level Converter",
+        "description": "Convert dBu, dBV, dBFS and volts in one place, with headroom worked out against your converter's alignment level — +18 dBu EBU, +24 dBu AES, or your own.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Audio calculator",
+        "operatingSystem": "Any (runs in a web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "featureList": [
+          "dBu, dBV, dBFS and volts RMS, all four at once",
+          "Headroom against a chosen alignment level",
+          "EBU R68 and AES/US alignment presets, or a custom one",
+          "Works offline"
+        ],
+        "author": {
+          "@id": "https://1khz.sh/#author"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "image": "https://1khz.sh/assets/og/db.png"
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="db">
 
@@ -118,6 +184,52 @@
 
       <p class="footnote" style="margin-top:16px">Consumer gear nominal is -10 dBV (&asymp; -7.8 dBu). The 11.8 dB gap to +4 dBu pro level is why that DJ mixer never seems loud enough.</p>
     </section>
+    <!-- ============================= NOTES ================================ -->
+    <section class="unit prose" aria-labelledby="lvlNotes">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="lvlNotes">dBu, dBV, dBFS: What Each One Means</h2>
+        <span class="plate-model">reference levels</span>
+      </div>
+
+      <h3>The two absolute ones</h3>
+      <p>
+        dBu and dBV both measure a real voltage, so a value in either one is a fact
+        about a wire. 0&nbsp;dBV is 1.0&nbsp;V RMS, which is the sensible definition.
+        0&nbsp;dBu is 0.775&nbsp;V RMS, which is the voltage that dissipates one
+        milliwatt into 600&nbsp;&Omega; &mdash; a telephone-era convention that
+        outlived the impedance it was based on. The gap between the two scales is a
+        fixed 2.21&nbsp;dB, always, in every direction.
+      </p>
+
+      <h3>The relative one</h3>
+      <p>
+        dBFS is different in kind: it measures how far below digital full scale a
+        signal is, and full scale is not a voltage until somebody decides what it is.
+        That decision is the alignment level, and it is not standardised across the
+        industry. European broadcast (EBU R68) puts 0&nbsp;dBFS at +18&nbsp;dBu;
+        American practice (SMPTE RP155, AES) usually puts it at +24&nbsp;dBu. Same
+        &minus;20&nbsp;dBFS reading, two different voltages on the output, six decibels
+        apart. Set the alignment to match your converters before trusting any dBFS
+        number here.
+      </p>
+
+      <h3>Headroom, and the &minus;10 problem</h3>
+      <p>
+        Headroom is simply the distance from where you normally sit to where clipping
+        starts. Nominal +4&nbsp;dBu into a +24&nbsp;dBu converter leaves 20&nbsp;dB of
+        room; the same signal into a +18&nbsp;dBu converter leaves 14&nbsp;dB. Consumer
+        gear runs at &minus;10&nbsp;dBV nominal, which is &minus;7.8&nbsp;dBu, so
+        plugging consumer outputs into pro inputs loses you about 11.8&nbsp;dB before
+        anything else has gone wrong.
+      </p>
+      <p class="footnote">
+        Every conversion here is exact arithmetic, not an approximation &mdash; the
+        equations are on the <a href="/math/#lvlMathTitle">formulas page</a>. For
+        turning voltage into acoustic output, see <a href="/spl/">SPL &amp; Power</a>.
+      </p>
+    </section>
+
   </main>
 
   <footer class="rack-foot">
