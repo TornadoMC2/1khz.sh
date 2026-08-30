@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SPL &amp; Power — 1kHz.sh</title>
-  <meta name="description" content="Loudspeaker SPL at distance, amplifier power for a target level with headroom, and speaker cable voltage-drop calculator.">
+  <title>SPL &amp; Amplifier Power Calculator — 1kHz.sh</title>
+  <meta name="description" content="Loudspeaker SPL at any distance, the amplifier power needed to hit a target level with headroom, and speaker cable voltage drop by gauge, length and impedance.">
   <link rel="canonical" href="https://1khz.sh/spl/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="SPL &amp; Power — 1kHz.sh">
-  <meta property="og:description" content="Loudspeaker SPL at distance, amplifier power for a target level with headroom, and speaker cable voltage-drop calculator.">
+  <meta property="og:description" content="Loudspeaker SPL at any distance, the amplifier power needed to hit a target level with headroom, and speaker cable voltage drop by gauge, length and impedance.">
   <meta property="og:url" content="https://1khz.sh/spl/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/spl.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh SPL and amplifier power panel.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/spl.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,65 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://1khz.sh/spl/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "1kHz.sh",
+            "item": "https://1khz.sh/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "SPL & Power",
+            "item": "https://1khz.sh/spl/"
+          }
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://1khz.sh/spl/#app",
+        "url": "https://1khz.sh/spl/",
+        "name": "SPL & Power",
+        "description": "Loudspeaker SPL at any distance, the amplifier power needed to hit a target level with headroom, and speaker cable voltage drop by gauge, length and impedance.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Audio calculator",
+        "operatingSystem": "Any (runs in a web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "featureList": [
+          "SPL at distance from sensitivity and power",
+          "Amplifier power for a target SPL, with headroom",
+          "Speaker cable voltage drop and power lost to heat",
+          "Works offline"
+        ],
+        "author": {
+          "@id": "https://1khz.sh/#author"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "image": "https://1khz.sh/assets/og/spl.png"
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="spl">
 
@@ -202,6 +268,58 @@
       </div>
       <p class="footnote" style="margin-top:14px">Rule of thumb: keep the loss under 0.5 dB. Low-impedance loads punish thin cable — a 2 &Omega; sub run on 16 AWG is a crime scene.</p>
 
+    </section>
+
+    <!-- ============================= NOTES ================================ -->
+    <section class="unit prose" aria-labelledby="splNotes">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="splNotes">SPL, Power, and Cable</h2>
+        <span class="plate-model">planning numbers</span>
+      </div>
+
+      <h3>Level over distance</h3>
+      <p>
+        A point source in free field loses 6&nbsp;dB every time the distance doubles.
+        That is the inverse square law, and it is the number to plan with &mdash; but
+        it is also the number a real venue will argue with. Indoors, once you are past
+        critical distance the reverberant field stops the level falling at all. A line
+        array in its near field loses closer to 3&nbsp;dB per doubling, which is the
+        entire point of a line array. Treat the answer as the worst case for a single
+        box and expect reality to be kinder.
+      </p>
+
+      <h3>Sensitivity and amplifier power</h3>
+      <p>
+        Speaker sensitivity is the SPL produced by one watt at one metre, and it is the
+        most leveraged number in the whole chain: 3&nbsp;dB more sensitivity is worth
+        as much as doubling your amplifier. Going the other way is brutal arithmetic
+        &mdash; every extra 3&nbsp;dB doubles the power required, so +10&nbsp;dB needs
+        ten times the amp. This is why the honest answer to &quot;can we just turn it
+        up&quot; is usually more boxes rather than a bigger amplifier.
+      </p>
+      <p>
+        Headroom is not optional. Programme material has a crest factor of maybe
+        10&ndash;20&nbsp;dB between average and peak, so an amplifier sized for the
+        average level will clip on every transient. Size for the peaks.
+      </p>
+
+      <h3>Speaker cable</h3>
+      <p>
+        Speaker cable and the driver form a voltage divider, so the loss depends on the
+        ratio of cable resistance to load impedance &mdash; which means low-impedance
+        loads punish thin cable far harder. A long run of 16&nbsp;AWG into a
+        2&nbsp;&Omega; sub load can throw away a serious fraction of the amplifier's
+        output as heat in the copper. Keeping the loss under about 0.5&nbsp;dB is the
+        usual rule, and going up a gauge or two is much cheaper than going up an
+        amplifier.
+      </p>
+      <p class="footnote">
+        Each equation, and the free-field and point-source assumptions behind it, is on
+        the <a href="/math/#splMathTitle">formulas page</a>. For converting the
+        electrical side into dBu or dBFS, see the
+        <a href="/db/">level converter</a>.
+      </p>
     </section>
 
   </main>

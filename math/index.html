@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Formulas &amp; Assumptions — 1kHz.sh</title>
-  <meta name="description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and where each estimate stops being trustworthy.">
+  <title>Audio Formulas &amp; Assumptions — 1kHz.sh</title>
+  <meta name="description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and, for each, where the estimate stops being trustworthy.">
   <link rel="canonical" href="https://1khz.sh/math/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Formulas &amp; Assumptions — 1kHz.sh">
-  <meta property="og:description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and where each estimate stops being trustworthy.">
+  <meta property="og:description" content="Every formula this site uses, written out, with the constants and the assumptions behind each one — and, for each, where the estimate stops being trustworthy.">
   <meta property="og:url" content="https://1khz.sh/math/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/math.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh formulas and assumptions page.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/math.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,52 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://1khz.sh/math/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "1kHz.sh",
+            "item": "https://1khz.sh/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Formulas & Assumptions",
+            "item": "https://1khz.sh/math/"
+          }
+        ]
+      },
+      {
+        "@type": "TechArticle",
+        "@id": "https://1khz.sh/math/#article",
+        "url": "https://1khz.sh/math/",
+        "headline": "Audio Formulas & Assumptions",
+        "description": "Every formula this site uses, written out, with the constants and the assumptions behind each one — and, for each, where the estimate stops being trustworthy.",
+        "inLanguage": "en",
+        "author": {
+          "@id": "https://1khz.sh/#author"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "about": [
+          "Acoustics",
+          "Audio engineering",
+          "Sound reinforcement"
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="math">
 

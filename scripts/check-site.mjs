@@ -55,8 +55,18 @@ for (const m of MODULES) {
   if (!html.includes(`<link rel="canonical" href="https://1khz.sh${pageUrl(m)}">`)) {
     fail(`${f}: missing or wrong rel=canonical (needed — every subdomain serves this page)`);
   }
-  for (const tag of ["og:title", "og:description", "og:url"]) {
+  for (const tag of ["og:title", "og:description", "og:url", "og:image"]) {
     if (!html.includes(`property="${tag}"`)) fail(`${f}: missing ${tag}`);
+  }
+  // A share card only renders large if the card is declared large *and* the
+  // image it points at was actually generated (`npm run og`).
+  if (!html.includes('content="summary_large_image"')) {
+    fail(`${f}: twitter:card should be summary_large_image (there is an og:image)`);
+  }
+  const ogImage = html.match(/property="og:image" content="https:\/\/1khz\.sh(\/assets\/og\/[^"]+)"/)?.[1];
+  if (!ogImage) fail(`${f}: og:image is not an absolute https://1khz.sh URL`);
+  else if (!existsSync(join(ROOT, ogImage))) {
+    fail(`${f}: og:image points at ${ogImage}, which does not exist — run \`npm run og\``);
   }
   if (!html.includes("/assets/js/panel-common.js")) {
     fail(`${f}: does not load panel-common.js`);
@@ -66,6 +76,72 @@ for (const m of MODULES) {
   }
 }
 if (!failures) pass(`all ${MODULES.length} pages present, linked, and tagged`);
+
+/* --------------------------------------------------------------------- seo */
+// Search engines show the <title> and the description, and nothing on this
+// site regenerates them — so a duplicated or overlong one would ship unnoticed.
+section("Titles, descriptions, and structured data");
+{
+  const before = failures;
+  const seen = { title: new Map(), desc: new Map() };
+  // Enough to measure length honestly; these pages use a handful of entities.
+  const text = (s) => s
+    .replace(/&mdash;/g, "\u2014").replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ").replace(/&[a-z]+;/g, "?");
+
+  for (const m of MODULES) {
+    const f = pageFile(m);
+    if (!existsSync(join(ROOT, f))) continue;
+    const html = read(f);
+
+    const title = text(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
+    const desc = text(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
+
+    if (!title) fail(`${f}: no <title>`);
+    // Google truncates the title around 60 characters and the description
+    // around 160; past that the tail is written for nobody.
+    else if (title.length > 65) fail(`${f}: title is ${title.length} chars (keep it under ~60)`);
+    if (!desc) fail(`${f}: no meta description`);
+    else if (desc.length < 70 || desc.length > 165) {
+      fail(`${f}: description is ${desc.length} chars (aim for 120-160)`);
+    }
+
+    // Two pages sharing either one means one of them is invisible.
+    for (const [key, value] of [["title", title], ["desc", desc]]) {
+      const prev = seen[key].get(value);
+      if (value && prev) fail(`${f}: ${key} is identical to ${prev}`);
+      seen[key].set(value, f);
+    }
+
+    const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+    if (!ld) fail(`${f}: no JSON-LD block`);
+    else {
+      try {
+        const data = JSON.parse(ld);
+        const graph = data["@graph"] ?? [data];
+        // Every URL in the graph has to be the canonical apex one, or the
+        // structured data describes a subdomain that shouldn't be indexed.
+        const urls = JSON.stringify(graph).match(/"https?:\/\/[^"]+"/g) ?? [];
+        for (const u of urls) {
+          if (u.includes("1khz.sh") && !u.startsWith('"https://1khz.sh')) {
+            fail(`${f}: JSON-LD contains a non-canonical 1khz.sh URL ${u}`);
+          }
+        }
+        if (!graph.some((n) => n["@type"])) fail(`${f}: JSON-LD has no @type`);
+      } catch (e) {
+        fail(`${f}: JSON-LD does not parse — ${e.message}`);
+      }
+    }
+  }
+
+  // The 404 is reachable from every wrong URL on every subdomain; it must
+  // never be a candidate for indexing.
+  if (!read("404.html").includes('name="robots" content="noindex"')) {
+    fail("404.html: missing <meta name=robots content=noindex>");
+  }
+
+  if (failures === before) pass("titles and descriptions are unique and sized, JSON-LD parses");
+}
 
 /* -------------------------------------------------------- offline caching */
 section("Service worker precaches the whole site");
@@ -100,7 +176,16 @@ section("Sitemap matches the pages");
       fail(`sitemap.xml is missing https://1khz.sh${pageUrl(m)}`);
     }
   }
-  if (failures === before) pass("every page is listed");
+  // lastmod is generated from git by `npm run sitemap`; a <url> without one
+  // means the file was hand-edited and has started drifting.
+  const urls = sitemap.match(/<url>[\s\S]*?<\/url>/g) ?? [];
+  for (const u of urls) {
+    if (!/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(u)) {
+      const loc = u.match(/<loc>([^<]*)<\/loc>/)?.[1] ?? "?";
+      fail(`sitemap.xml: ${loc} has no valid <lastmod> — run \`npm run sitemap\``);
+    }
+  }
+  if (failures === before) pass(`every page is listed, all ${urls.length} with a lastmod`);
 }
 
 /* ------------------------------------------------------------ dead links */

@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>1kHz.sh — Signal Generator</title>
-  <meta name="description" content="Browser signal generator and audio field kit. Any subdomain is a frequency: 440.1khz.sh opens tuned to A440.">
+  <title>Online Tone Generator — 20 Hz to 20 kHz — 1kHz.sh</title>
+  <meta name="description" content="Free online tone generator: sine, square, triangle, saw and noise from 20 Hz to 20 kHz, in your browser. Any subdomain is a frequency — 440.1khz.sh is A440.">
   <link rel="canonical" href="https://1khz.sh/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
-  <meta property="og:title" content="1kHz.sh — Signal Generator">
-  <meta property="og:description" content="Browser signal generator and audio field kit. Any subdomain is a frequency: 440.1khz.sh opens tuned to A440.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Online Tone Generator — 1kHz.sh">
+  <meta property="og:description" content="Free online tone generator: sine, square, triangle, saw and noise from 20 Hz to 20 kHz, in your browser. Any subdomain is a frequency — 440.1khz.sh is A440.">
   <meta property="og:url" content="https://1khz.sh/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/home.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh signal generator panel, with a sine wave on the oscilloscope.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/home.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,67 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://1khz.sh/#website",
+        "url": "https://1khz.sh/",
+        "name": "1kHz.sh",
+        "alternateName": "1kHz.sh Audio Field Kit",
+        "description": "A browser signal generator and a field kit of audio calculators for live sound and studio work.",
+        "inLanguage": "en",
+        "publisher": {
+          "@id": "https://1khz.sh/#author"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://1khz.sh/#author",
+        "name": "Hunter Johanson",
+        "url": "https://github.com/TornadoMC2"
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://1khz.sh/#app",
+        "url": "https://1khz.sh/",
+        "name": "1kHz.sh Signal Generator",
+        "description": "Free online tone generator: sine, square, triangle, saw and noise from 20 Hz to 20 kHz, in your browser. Any subdomain is a frequency — 440.1khz.sh is A440.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Signal generator",
+        "operatingSystem": "Any (runs in a web browser)",
+        "browserRequirements": "Requires JavaScript and the Web Audio API",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "featureList": [
+          "Sine, square, triangle and sawtooth oscillators",
+          "White and pink noise",
+          "20 Hz to 20 kHz, tuned by fader, keypad or subdomain",
+          "Independent left and right channel levels",
+          "Live oscilloscope",
+          "Works offline"
+        ],
+        "author": {
+          "@id": "https://1khz.sh/#author"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "image": "https://1khz.sh/assets/og/home.png"
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="gen">
 
@@ -228,6 +296,53 @@
         and set the dial. Nothing is looked up, nothing is logged beyond the request itself, and
         the same page works with the network off &mdash; see
         <a href="/about/">how to verify all of that</a>.
+      </p>
+    </section>
+
+    <!-- ============================= NOTES ================================ -->
+    <section class="unit prose" aria-labelledby="useTitle">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="plate-head">
+        <h2 class="plate-name" id="useTitle">What a Tone Generator Is For</h2>
+        <span class="plate-model">practical uses</span>
+      </div>
+
+      <p>
+        A steady test tone is the simplest diagnostic instrument in audio, and most of
+        what it is good for takes under a minute.
+      </p>
+      <ul>
+        <li><strong>Ringing out a room.</strong> Sweep slowly and listen for the
+          frequency that jumps out before anything else does. That is the one to pull
+          on the graphic.</li>
+        <li><strong>Checking a signal path.</strong> A 1&nbsp;kHz sine at a known level
+          is the standard way to confirm that a cable, a channel, or an entire
+          patchbay is passing audio and passing it at the level you expect.</li>
+        <li><strong>Finding a buzz.</strong> 50 or 60&nbsp;Hz and their harmonics are
+          mains hum; matching the tone to the noise tells you whether you are chasing a
+          ground loop or something else entirely.</li>
+        <li><strong>Testing speakers and headphones.</strong> A slow sweep reveals
+          rattles, buzzes, and dead drivers that music will happily hide.</li>
+        <li><strong>Tuning an instrument.</strong> A 440&nbsp;Hz reference and your
+          ears, which is how everyone did it before clip-on tuners.</li>
+        <li><strong>Setting a crossover.</strong> Tones either side of the crossover
+          point tell you which box is doing the work.</li>
+      </ul>
+      <p>
+        Sine is the tone to reach for in almost every case &mdash; it has energy at one
+        frequency and nowhere else, so anything else you hear is the system, not the
+        signal. Square, triangle, and sawtooth add harmonics in known amounts, which is
+        useful for hearing distortion and for exciting a room quickly. White noise has
+        equal energy per hertz and sounds bright; pink noise has equal energy per
+        octave, which is much closer to how we hear, and is what most measurement work
+        uses.
+      </p>
+      <p class="footnote">
+        Tones through a PA are not a toy: sustained signals carry far more energy than
+        music at the same meter reading, and high frequencies kill compression drivers
+        at levels that feel moderate. The output starts off and the level starts at
+        &minus;18&nbsp;dBFS on purpose &mdash; see
+        <a href="/about/">using it safely</a>.
       </p>
     </section>
 

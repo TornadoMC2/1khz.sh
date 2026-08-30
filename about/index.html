@@ -8,10 +8,17 @@
   <link rel="canonical" href="https://1khz.sh/about/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="1kHz.sh">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="About &amp; Privacy — 1kHz.sh">
   <meta property="og:description" content="What this site is, who made it, exactly what it does and does not collect, and how to verify every one of those claims for yourself in about a minute.">
   <meta property="og:url" content="https://1khz.sh/about/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://1khz.sh/assets/og/about.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The 1kHz.sh about and privacy page.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://1khz.sh/assets/og/about.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100a'/%3E%3Cpath d='M3 16 C7 6 9 6 13 16 S19 26 23 16 27 6 29 12' stroke='%23ffb257' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="/assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/barlow-sc-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,6 +30,47 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="1kHz.sh">
+  <!-- Structured data. Declarative JSON, not executable code:
+       there is still no script on this site that runs. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://1khz.sh/about/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "1kHz.sh",
+            "item": "https://1khz.sh/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "About & Privacy",
+            "item": "https://1khz.sh/about/"
+          }
+        ]
+      },
+      {
+        "@type": "AboutPage",
+        "@id": "https://1khz.sh/about/#page",
+        "url": "https://1khz.sh/about/",
+        "name": "About & Privacy",
+        "description": "What this site is, who made it, exactly what it does and does not collect, and how to verify every one of those claims for yourself in about a minute.",
+        "inLanguage": "en",
+        "about": {
+          "@id": "https://1khz.sh/#website"
+        },
+        "isPartOf": {
+          "@id": "https://1khz.sh/#website"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-page="about">
 
@@ -170,7 +218,11 @@
           repository &mdash; not minified, not transpiled, not obfuscated. View source
           on this page, or read
           <a href="https://github.com/TornadoMC2/1khz.sh" rel="noopener noreferrer" target="_blank">the whole project on GitHub</a>.
-          It is a few hundred lines. The maths is all in one file.
+          It is a few hundred lines. The maths is all in one file. The only
+          <code>&lt;script&gt;</code> tag in the page source that isn't a module
+          from <code>/assets/js/</code> is a block of
+          <code>application/ld+json</code> &mdash; structured data describing the
+          page for search engines. No browser executes it; it is a label, not code.
         </li>
       </ol>
       <p class="footnote">

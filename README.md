@@ -113,6 +113,20 @@ ES modules need a real origin, so opening the `.html` files directly won't
 work. The service worker stays dormant on `http://localhost`, so you always see
 fresh files.
 
+There is nothing to compile, but there are a few things a build step would
+normally catch, so `npm test` walks the repo instead — nav links, the offline
+precache, dead internal links, canonical tags, page titles, structured data.
+Run it before you commit.
+
+A couple of files are generated rather than written, and their output is
+committed:
+
+```sh
+npm run og         # re-render assets/og/*.png, the social cards (macOS only)
+npm run sitemap    # rewrite sitemap.xml, lastmod dates read from git log
+npm run fonts      # re-vendor the woff2 subsets into assets/fonts/
+```
+
 Hosting it somewhere public — including the wildcard-subdomain setup, which
 narrows the field considerably — is covered in **[DEPLOYING.md](DEPLOYING.md)**.
 
@@ -130,6 +144,10 @@ A few conventions worth keeping:
 - **No dependencies, no build step.** Everything must run as-authored in a
   browser.
 - **No third-party requests, ever.** CI fails the build if one appears.
+- **Every page carries its own metadata.** A `rel=canonical` pointing at the
+  apex (every subdomain serves the same file, so without it the whole site
+  reads as duplicate content), a unique title and description, an `og:image`
+  from `assets/og/`, and a JSON-LD block. `npm test` checks all of it.
 
 The bar for a new module is simply that it be worth pulling out a phone for
 while a room full of people waits.

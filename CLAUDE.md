@@ -20,12 +20,20 @@ npm start          # python3 -m http.server 8000
 npm test           # node scripts/check-site.mjs — structural checks
 npm run deploy     # npx wrangler deploy (Cloudflare Workers)
 npm run fonts      # re-vendor the woff2 subsets into assets/fonts/
+npm run og         # re-render the social cards into assets/og/ (macOS only)
+npm run sitemap    # regenerate sitemap.xml, lastmod dates read from git
 ```
 
 `npm test` is not a unit-test suite; it walks the repo and fails on the things
 a build step would otherwise catch: a page missing from the nav, a module left
 out of the service worker's precache, a dead internal link, a leftover
-placeholder URL, a page missing its `rel=canonical`. Run it before committing.
+placeholder URL, a page missing its `rel=canonical`, a duplicated or overlong
+`<title>`, an `og:image` pointing at a card nobody rendered, JSON-LD that
+doesn't parse. Run it before committing.
+
+`npm run og` and `npm run sitemap` are generators, not part of the build —
+their output is committed. `make-og.mjs` shells out to `qlmanage` and `sips`,
+so it only runs on macOS; CI and the deploy never invoke it.
 
 Use `?f=<hz>` during local testing to simulate arriving on a tuned subdomain
 (see below) since localhost can't carry a wildcard-subdomain hostname.
@@ -78,6 +86,16 @@ duplicate content. `npm test` enforces this.
   `.unit`, `.plate-head`, `.ctrl-row`, `.seg`, `.fader`, `.readout-grid`,
   etc.) used by every page.
 
+**Generated assets** (committed, not built):
+
+- `assets/og/*.png` — 1200x630 social cards, one per page, authored as SVG in
+  `scripts/make-og.mjs` (with the vendored fonts inlined, since a rasteriser
+  won't fetch `/assets/fonts/`), rendered by `qlmanage`, then palette-reduced
+  by `scripts/lib/png-shrink.mjs` — a pure-`node:zlib` PNG re-encoder, since
+  the project has no image tooling. ~200 KB of truecolour becomes ~28 KB.
+- `sitemap.xml` — written by `scripts/make-sitemap.mjs`; `lastmod` comes from
+  `git log`, so it is never a date somebody typed and then forgot.
+
 **Per-page module convention** (see `generator.js` or `note.js`): a `state`
 object seeded from `getTunedFrequency()`, a `$`/`el` DOM lookup table built
 once at the top, plain functions to recompute derived values and write them
@@ -107,12 +125,25 @@ power-on gesture (browser autoplay policy), and the scope always taps
   constants, and an honest `.assumes` block saying where it stops being
   trustworthy. The site's credibility rests on that page being complete.
 - The privacy claims on `/about/` are specific and CI-enforced: no cookies, no
-  `localStorage`/`sessionStorage`/IndexedDB, no beacons, no inline scripts, no
-  third-party requests of any kind. Don't add one without changing that page.
+  `localStorage`/`sessionStorage`/IndexedDB, no beacons, no inline scripts
+  (bar inert JSON-LD), no third-party requests of any kind. Don't add one
+  without changing that page.
 - Bump `CACHE` in `sw.js` and add any new page/module/font to its `PRECACHE`
   list when shipping changes (`npm test` catches the second half of that).
-- New pages also need: a `rel=canonical`, the og: meta block, a `sitemap.xml`
-  entry, and a nav link on *every* other page. `npm test` checks all of these.
+- New pages also need: a `rel=canonical`, the og: meta block (including an
+  `og:image` — add the page to `CARDS` in `scripts/make-og.mjs` and run
+  `npm run og`), a JSON-LD block, a `sitemap.xml` entry (add it to `PAGES` in
+  `scripts/make-sitemap.mjs` and run `npm run sitemap`), and a nav link on
+  *every* other page. `npm test` checks all of these.
+- SEO: the `<title>` leads with what people actually search for and ends with
+  the brand ("Delay Time Calculator — Distance to ms — 1kHz.sh"), stays under
+  ~60 characters, and is unique; the description runs 120-160. Both are
+  length- and uniqueness-checked by `npm test`. Every calculator page carries
+  a prose "notes" section below the panel — the calculators are otherwise
+  ~150 words of UI labels, which is too thin to rank for anything.
+- `application/ld+json` is the one inline `<script>` the CI inline-script rule
+  allows, because nothing executes it. If that ever needs revisiting, the
+  claim it rests on is spelled out on `/about/` under "Read it".
 
 ## Deployment
 

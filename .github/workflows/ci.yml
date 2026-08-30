@@ -59,11 +59,15 @@ jobs:
 
       - name: No inline scripts (keeps the check above honest, and the CSP tight)
         run: |
-          if git grep -nP '<script(?![^>]*\bsrc=)' -- '*.html'; then
+          # Every <script> must either load an external module or be JSON-LD.
+          # A type="application/ld+json" block is structured data, not code: no
+          # engine executes it, so it can't reach a storage or network API and
+          # the /about/ claims stay true. Anything else inline is a bug.
+          if git grep -nP '<script(?![^>]*\bsrc=)(?![^>]*type="application/ld\+json")' -- '*.html'; then
             echo "::error::Inline <script> found — all JS must live in /assets/js/."
             exit 1
           fi
-          echo "clean: every script is an external module"
+          echo "clean: every script is either external or inert JSON-LD"
 
       - name: Check every referenced font file exists
         run: |
